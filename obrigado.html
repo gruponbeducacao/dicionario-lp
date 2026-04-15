@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Seu Dicionário Contábil — Download em andamento</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--azul:#1B2A4A;--azul-med:#2A3F6F;--dourado:#C8A84B;--dourado-esc:#A68A3E;--cream:#FBF6E9;--branco:#FFFFFF;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{font-family:'Montserrat',sans-serif;background:var(--azul);color:var(--branco);min-height:100vh;display:flex;flex-direction:column;background-image:linear-gradient(rgba(200,168,75,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(200,168,75,0.05) 1px,transparent 1px);background-size:60px 60px;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+@keyframes spin{to{transform:rotate(360deg)}}
+header{padding:24px 5%;border-bottom:1px solid rgba(200,168,75,0.15);}
+header strong{font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;}
+header span{color:var(--dourado);}
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 5%;}
+.box{max-width:640px;width:100%;text-align:center;}
+.lbl{display:inline-block;font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--dourado);margin-bottom:14px;}
+.bar{width:44px;height:3px;background:var(--dourado);margin:0 auto 28px;}
+h1{font-size:clamp(28px,4vw,46px);font-weight:900;line-height:1.1;letter-spacing:-1px;margin-bottom:18px;}
+h1 em{font-style:normal;color:var(--dourado);}
+.lead{font-size:16px;line-height:1.7;color:rgba(255,255,255,0.7);font-family:'Source Serif 4',serif;margin-bottom:36px;}
+.dl-card{background:rgba(200,168,75,0.06);border:1px solid rgba(200,168,75,0.25);border-radius:6px;padding:32px 28px;margin-bottom:36px;}
+.dl-status{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dourado);margin-bottom:18px;}
+.spinner{width:14px;height:14px;border:2px solid rgba(200,168,75,0.3);border-top-color:var(--dourado);border-radius:50%;animation:spin 0.7s linear infinite;}
+.dot{width:8px;height:8px;background:var(--dourado);border-radius:50%;animation:blink 1.2s infinite;}
+.dl-card h2{font-size:20px;font-weight:800;margin-bottom:8px;}
+.dl-card p{font-size:13px;color:rgba(255,255,255,0.55);font-family:'Source Serif 4',serif;line-height:1.6;}
+.btn{display:inline-block;background:var(--dourado);color:var(--azul);padding:14px 32px;font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;border-radius:3px;border:2px solid var(--dourado);transition:all 0.2s;margin-top:18px;cursor:pointer;}
+.btn:hover{background:var(--dourado-esc);border-color:var(--dourado-esc);transform:translateY(-2px);box-shadow:0 8px 24px rgba(200,168,75,0.3);}
+.next{margin-top:42px;padding-top:32px;border-top:1px solid rgba(200,168,75,0.12);}
+.next h3{font-size:14px;font-weight:800;letter-spacing:0.5px;margin-bottom:12px;color:var(--branco);}
+.next p{font-size:14px;line-height:1.7;color:rgba(255,255,255,0.55);font-family:'Source Serif 4',serif;}
+.socials{margin-top:24px;display:flex;justify-content:center;gap:18px;}
+.socials a{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dourado);text-decoration:none;border:1px solid rgba(200,168,75,0.3);padding:10px 18px;border-radius:3px;transition:all 0.2s;}
+.socials a:hover{background:rgba(200,168,75,0.1);}
+.method{margin-top:42px;padding:32px 28px;background:linear-gradient(135deg,rgba(200,168,75,0.12) 0%,rgba(200,168,75,0.04) 100%);border:1px solid rgba(200,168,75,0.3);border-radius:6px;text-align:left;}
+.method .lbl{margin-bottom:10px;}
+.method h3{font-size:20px;font-weight:800;line-height:1.25;margin-bottom:10px;color:var(--branco);}
+.method h3 em{font-style:normal;color:var(--dourado);}
+.method p{font-size:14px;line-height:1.65;color:rgba(255,255,255,0.7);font-family:'Source Serif 4',serif;margin-bottom:20px;}
+.method .btn-o{display:inline-flex;align-items:center;gap:10px;background:transparent;color:var(--dourado);padding:12px 22px;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;border-radius:3px;border:1.5px solid var(--dourado);transition:all 0.2s;font-family:'Montserrat',sans-serif;}
+.method .btn-o:hover{background:var(--dourado);color:var(--azul);transform:translateY(-2px);box-shadow:0 8px 20px rgba(200,168,75,0.25);}
+footer{padding:20px 5%;text-align:center;font-size:11px;color:rgba(255,255,255,0.25);border-top:1px solid rgba(255,255,255,0.05);}
+</style>
+</head>
+<body>
+
+<header>
+  <strong>Fluência <span>Contábil</span></strong>
+</header>
+
+<main>
+  <div class="box">
+    <span class="lbl">Pronto</span>
+    <div class="bar"></div>
+    <h1>Seu <em>Dicionário Contábil</em> está chegando.</h1>
+    <p class="lead">O download começou automaticamente. Se nada aconteceu em alguns segundos, clique no botão abaixo.</p>
+
+    <div class="dl-card">
+      <div class="dl-status" id="status"><span class="spinner"></span>Iniciando download...</div>
+      <h2>Dicionário Contábil — Edição 2026</h2>
+      <p>200+ termos essenciais · PDF · ~3 MB</p>
+      <a id="dl" class="btn" href="Dicionario_Contabil_Fluencia.pdf" download="Dicionario_Contabil_Fluencia.pdf">Baixar PDF agora</a>
+    </div>
+
+    <div class="next">
+      <h3>O que vem a seguir</h3>
+      <p>Em alguns minutos, você recebe uma cópia do dicionário no seu e-mail, mais uma sequência curta de conteúdo pra destravar sua contabilidade antes da próxima prova. Confere a caixa de entrada (e a aba de promoções, por garantia).</p>
+      <div class="socials">
+        <a href="https://www.instagram.com/prof.viniciusferraz" target="_blank" rel="noopener">@prof.viniciusferraz · Instagram</a>
+        <a href="https://www.youtube.com/@prof.viniciusferraz" target="_blank" rel="noopener">YouTube</a>
+      </div>
+    </div>
+
+    <div class="method">
+      <span class="lbl">Próximo passo</span>
+      <h3>Conheça o <em>método Fluência Contábil</em>.</h3>
+      <p>Enquanto o dicionário não chega no seu e-mail, entenda por que a gente defende que contabilidade é um idioma — e como desenvolver fluência é o que separa quem decora de quem passa.</p>
+      <a href="https://fluenciacontabil.com.br/" target="_blank" rel="noopener" class="btn-o">Conhecer o método →</a>
+    </div>
+  </div>
+</main>
+
+<footer>© 2026 Fluência Contábil · Prof. Vinícius Ferraz</footer>
+
+<script>
+/* Dispara o download automaticamente após 600ms (dá tempo da página renderizar) */
+window.addEventListener('load', function(){
+  setTimeout(function(){
+    var dl = document.getElementById('dl');
+    if (!dl) return;
+    /* clique programático no link com atributo download */
+    dl.click();
+    var s = document.getElementById('status');
+    if (s) s.innerHTML = '<span class="dot"></span>Download iniciado · Verifique sua pasta de Downloads';
+  }, 600);
+});
+
+/* Tracking opcional (Pixel/GA) — confirma a conversão na página de obrigado */
+try { if (window.fbq) fbq('track', 'CompleteRegistration'); } catch(e){}
+try { if (window.gtag) gtag('event', 'sign_up', {method:'LP_Dicionario'}); } catch(e){}
+</script>
+
+</body>
+</html>
