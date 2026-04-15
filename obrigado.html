@@ -13,9 +13,16 @@ html,body{height:100%;}
 body{font-family:'Montserrat',sans-serif;background:var(--azul);color:var(--branco);min-height:100vh;display:flex;flex-direction:column;background-image:linear-gradient(rgba(200,168,75,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(200,168,75,0.05) 1px,transparent 1px);background-size:60px 60px;}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
 @keyframes spin{to{transform:rotate(360deg)}}
-header{padding:24px 5%;border-bottom:1px solid rgba(200,168,75,0.15);}
-header strong{font-size:13px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;}
-header span{color:var(--dourado);}
+@keyframes fadeSwap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── HEADER (logo igual ao da LP principal) ── */
+header{background:rgba(27,42,74,0.98);backdrop-filter:blur(12px);border-bottom:1px solid rgba(200,168,75,0.2);padding:18px 5%;display:flex;align-items:center;}
+.logo{text-decoration:none;display:flex;align-items:center;gap:12px;}
+.logo-mark{width:42px;height:42px;background:var(--azul);border:1.5px solid var(--dourado);border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'Source Serif 4',serif;font-weight:600;font-style:italic;color:var(--dourado);font-size:24px;line-height:1;}
+.logo-txt{display:flex;flex-direction:column;line-height:1.1;}
+.logo-txt .n1{font-size:14px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--branco);}
+.logo-txt .n2{font-size:9px;font-weight:600;letter-spacing:3.2px;text-transform:uppercase;color:var(--dourado);margin-top:3px;}
+
 main{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 5%;}
 .box{max-width:640px;width:100%;text-align:center;}
 .lbl{display:inline-block;font-size:10px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--dourado);margin-bottom:14px;}
@@ -23,63 +30,140 @@ main{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 
 h1{font-size:clamp(28px,4vw,46px);font-weight:900;line-height:1.1;letter-spacing:-1px;margin-bottom:18px;}
 h1 em{font-style:normal;color:var(--dourado);}
 .lead{font-size:16px;line-height:1.7;color:rgba(255,255,255,0.7);font-family:'Source Serif 4',serif;margin-bottom:36px;}
-.dl-card{background:rgba(200,168,75,0.06);border:1px solid rgba(200,168,75,0.25);border-radius:6px;padding:32px 28px;margin-bottom:36px;}
-.dl-status{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dourado);margin-bottom:18px;}
+
+/* ── CARD (dois estados: download e whatsapp) ── */
+.card{background:rgba(200,168,75,0.06);border:1px solid rgba(200,168,75,0.25);border-radius:6px;padding:32px 28px;margin-bottom:36px;animation:fadeSwap 0.4s ease;}
+.card.hidden{display:none;}
+.card-status{display:inline-flex;align-items:center;gap:10px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dourado);margin-bottom:18px;}
 .spinner{width:14px;height:14px;border:2px solid rgba(200,168,75,0.3);border-top-color:var(--dourado);border-radius:50%;animation:spin 0.7s linear infinite;}
 .dot{width:8px;height:8px;background:var(--dourado);border-radius:50%;animation:blink 1.2s infinite;}
-.dl-card h2{font-size:20px;font-weight:800;margin-bottom:8px;}
-.dl-card p{font-size:13px;color:rgba(255,255,255,0.55);font-family:'Source Serif 4',serif;line-height:1.6;}
+.check{width:16px;height:16px;color:var(--dourado);}
+.card h2{font-size:20px;font-weight:800;margin-bottom:8px;}
+.card h2 em{font-style:normal;color:var(--dourado);}
+.card p{font-size:13px;color:rgba(255,255,255,0.6);font-family:'Source Serif 4',serif;line-height:1.6;}
 .btn{display:inline-block;background:var(--dourado);color:var(--azul);padding:14px 32px;font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;border-radius:3px;border:2px solid var(--dourado);transition:all 0.2s;margin-top:18px;cursor:pointer;}
 .btn:hover{background:var(--dourado-esc);border-color:var(--dourado-esc);transform:translateY(-2px);box-shadow:0 8px 24px rgba(200,168,75,0.3);}
+
+/* Estado WhatsApp (segundo card) */
+#wppCard{background:linear-gradient(135deg,rgba(37,211,102,0.10) 0%,rgba(200,168,75,0.05) 100%);border-color:rgba(37,211,102,0.4);}
+#wppCard .card-status{color:#25D366;}
+.wpp-ico{width:56px;height:56px;margin:0 auto 18px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(37,211,102,0.35);}
+.wpp-ico svg{width:32px;height:32px;color:#fff;}
+#wppCard h2{font-size:22px;line-height:1.3;margin-bottom:12px;}
+#wppCard p{font-size:14px;color:rgba(255,255,255,0.72);margin-bottom:8px;}
+.wpp-btn{display:inline-flex;align-items:center;gap:12px;background:#25D366;color:#fff;padding:15px 30px;font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;text-decoration:none;border-radius:3px;border:2px solid #25D366;transition:all 0.2s;margin-top:20px;}
+.wpp-btn:hover{background:#1ebe57;border-color:#1ebe57;transform:translateY(-2px);box-shadow:0 10px 28px rgba(37,211,102,0.35);}
+.wpp-btn svg{width:18px;height:18px;}
+.wpp-skip{display:block;margin-top:14px;font-size:11px;color:rgba(255,255,255,0.35);text-decoration:none;letter-spacing:1px;text-transform:uppercase;transition:color 0.2s;}
+.wpp-skip:hover{color:rgba(255,255,255,0.65);}
+
+/* ── NEXT / SOCIAIS ── */
 .next{margin-top:42px;padding-top:32px;border-top:1px solid rgba(200,168,75,0.12);}
 .next h3{font-size:14px;font-weight:800;letter-spacing:0.5px;margin-bottom:12px;color:var(--branco);}
 .next p{font-size:14px;line-height:1.7;color:rgba(255,255,255,0.55);font-family:'Source Serif 4',serif;}
-.socials{margin-top:24px;display:flex;justify-content:center;gap:18px;}
-.socials a{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dourado);text-decoration:none;border:1px solid rgba(200,168,75,0.3);padding:10px 18px;border-radius:3px;transition:all 0.2s;}
-.socials a:hover{background:rgba(200,168,75,0.1);}
-.method{margin-top:42px;padding:32px 28px;background:linear-gradient(135deg,rgba(200,168,75,0.12) 0%,rgba(200,168,75,0.04) 100%);border:1px solid rgba(200,168,75,0.3);border-radius:6px;text-align:left;}
+
+.socials{margin-top:28px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap;}
+.social-btn{display:inline-flex;align-items:center;gap:12px;padding:12px 20px;border-radius:4px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);text-decoration:none;transition:all 0.25s;min-width:210px;}
+.social-btn:hover{transform:translateY(-3px);background:rgba(255,255,255,0.06);box-shadow:0 10px 28px rgba(0,0,0,0.28);}
+.social-ico{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.social-ico svg{width:22px;height:22px;color:#fff;}
+.social-ico.ig{background:linear-gradient(135deg,#405DE6 0%,#5851DB 12%,#833AB4 24%,#C13584 40%,#E1306C 56%,#FD1D1D 70%,#F56040 84%,#FCAF45 100%);}
+.social-ico.yt{background:#FF0000;}
+.social-txt{display:flex;flex-direction:column;text-align:left;line-height:1.2;}
+.social-net{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.45);}
+.social-handle{font-size:13px;font-weight:700;color:var(--branco);margin-top:3px;letter-spacing:0.2px;}
+.social-btn:hover .social-handle{color:var(--dourado);}
+
+/* ── MÉTODO ── */
+.method{margin-top:42px;padding:32px 28px;background:linear-gradient(135deg,rgba(200,168,75,0.12) 0%,rgba(200,168,75,0.04) 100%);border:1px solid rgba(200,168,75,0.3);border-radius:6px;text-align:center;}
 .method .lbl{margin-bottom:10px;}
-.method h3{font-size:20px;font-weight:800;line-height:1.25;margin-bottom:10px;color:var(--branco);}
+.method h3{font-size:20px;font-weight:800;line-height:1.3;margin-bottom:10px;color:var(--branco);}
 .method h3 em{font-style:normal;color:var(--dourado);}
-.method p{font-size:14px;line-height:1.65;color:rgba(255,255,255,0.7);font-family:'Source Serif 4',serif;margin-bottom:20px;}
-.method .btn-o{display:inline-flex;align-items:center;gap:10px;background:transparent;color:var(--dourado);padding:12px 22px;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;border-radius:3px;border:1.5px solid var(--dourado);transition:all 0.2s;font-family:'Montserrat',sans-serif;}
+.method p{font-size:14px;line-height:1.65;color:rgba(255,255,255,0.7);font-family:'Source Serif 4',serif;margin:0 auto 22px;max-width:460px;}
+.method .btn-o{display:inline-flex;align-items:center;gap:10px;background:transparent;color:var(--dourado);padding:12px 26px;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;border-radius:3px;border:1.5px solid var(--dourado);transition:all 0.2s;font-family:'Montserrat',sans-serif;}
 .method .btn-o:hover{background:var(--dourado);color:var(--azul);transform:translateY(-2px);box-shadow:0 8px 20px rgba(200,168,75,0.25);}
+
 footer{padding:20px 5%;text-align:center;font-size:11px;color:rgba(255,255,255,0.25);border-top:1px solid rgba(255,255,255,0.05);}
+
+/* ── MOBILE ── */
+@media(max-width:600px){
+  header{padding:14px 5%;}
+  .logo-mark{width:38px;height:38px;font-size:22px;}
+  .logo-txt .n1{font-size:12px;}
+  .logo-txt .n2{font-size:8px;}
+  .socials{flex-direction:column;align-items:center;}
+  .social-btn{width:100%;max-width:260px;}
+  .card,.method{padding:26px 20px;}
+}
 </style>
 </head>
 <body>
 
 <header>
-  <strong>Fluência <span>Contábil</span></strong>
+  <a class="logo" href="https://fluenciacontabil.com.br" target="_blank" rel="noopener">
+    <div class="logo-mark">F</div>
+    <div class="logo-txt">
+      <span class="n1">Fluência</span>
+      <span class="n2">Contábil</span>
+    </div>
+  </a>
 </header>
 
 <main>
   <div class="box">
     <span class="lbl">Pronto</span>
     <div class="bar"></div>
-    <h1>Seu <em>Dicionário Contábil</em> está chegando.</h1>
-    <p class="lead">O download começou automaticamente. Se nada aconteceu em alguns segundos, clique no botão abaixo.</p>
+    <h1>Seu <em>Dicionário Contábil</em> está pronto.</h1>
+    <p class="lead">O download começa automaticamente. Se nada acontecer em alguns segundos, clique no botão abaixo.</p>
 
-    <div class="dl-card">
-      <div class="dl-status" id="status"><span class="spinner"></span>Iniciando download...</div>
+    <!-- ESTADO 1: Download -->
+    <div class="card" id="dlCard">
+      <div class="card-status" id="status"><span class="spinner"></span>Iniciando download...</div>
       <h2>Dicionário Contábil — Edição 2026</h2>
       <p>200+ termos essenciais · PDF · ~3 MB</p>
       <a id="dl" class="btn" href="Dicionario_Contabil_Fluencia.pdf" download="Dicionario_Contabil_Fluencia.pdf">Baixar PDF agora</a>
     </div>
 
+    <!-- ESTADO 2: WhatsApp (substitui o card de download após baixar) -->
+    <div class="card hidden" id="wppCard">
+      <div class="card-status"><svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>Download concluído</div>
+      <div class="wpp-ico">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.15-.174.2-.298.3-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/></svg>
+      </div>
+      <h2>Quer entrar no grupo <em>exclusivo</em> do lançamento?</h2>
+      <p>Vou abrir uma turma nova em breve. No grupo do WhatsApp você recebe antes de todo mundo as condições especiais, os bônus e a data de abertura das inscrições.</p>
+      <a class="wpp-btn" href="https://chat.whatsapp.com/KWIP2oAR7KgCSAPW1Lqgtm" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.15-.174.2-.298.3-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.67-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413"/></svg>
+        Entrar no grupo do WhatsApp
+      </a>
+      <a class="wpp-skip" href="#" id="skipWpp">Agora não, obrigado</a>
+    </div>
+
     <div class="next">
-      <h3>O que vem a seguir</h3>
-      <p>Em alguns minutos, você recebe uma cópia do dicionário no seu e-mail, mais uma sequência curta de conteúdo pra destravar sua contabilidade antes da próxima prova. Confere a caixa de entrada (e a aba de promoções, por garantia).</p>
+      <h3>Acompanhe também nas redes</h3>
+      <p>Conteúdo curto e prático pra você continuar desenvolvendo fluência em contabilidade no dia a dia.</p>
       <div class="socials">
-        <a href="https://www.instagram.com/prof.viniciusferraz" target="_blank" rel="noopener">@prof.viniciusferraz · Instagram</a>
-        <a href="https://www.youtube.com/@prof.viniciusferraz" target="_blank" rel="noopener">YouTube</a>
+        <a class="social-btn" href="https://www.instagram.com/prof.viniciusferraz" target="_blank" rel="noopener">
+          <span class="social-ico ig"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></span>
+          <span class="social-txt">
+            <span class="social-net">Instagram</span>
+            <span class="social-handle">@prof.viniciusferraz</span>
+          </span>
+        </a>
+        <a class="social-btn" href="https://www.youtube.com/@prof.viniciusferraz" target="_blank" rel="noopener">
+          <span class="social-ico yt"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></span>
+          <span class="social-txt">
+            <span class="social-net">YouTube</span>
+            <span class="social-handle">@prof.viniciusferraz</span>
+          </span>
+        </a>
       </div>
     </div>
 
     <div class="method">
       <span class="lbl">Próximo passo</span>
       <h3>Conheça o <em>método Fluência Contábil</em>.</h3>
-      <p>Enquanto o dicionário não chega no seu e-mail, entenda por que a gente defende que contabilidade é um idioma — e como desenvolver fluência é o que separa quem decora de quem passa.</p>
+      <p>Entenda por que a gente defende que contabilidade é um idioma — e como desenvolver fluência é o que separa quem decora de quem passa.</p>
       <a href="https://fluenciacontabil.com.br/" target="_blank" rel="noopener" class="btn-o">Conhecer o método →</a>
     </div>
   </div>
@@ -88,21 +172,59 @@ footer{padding:20px 5%;text-align:center;font-size:11px;color:rgba(255,255,255,0
 <footer>© 2026 Fluência Contábil · Prof. Vinícius Ferraz</footer>
 
 <script>
-/* Dispara o download automaticamente após 600ms (dá tempo da página renderizar) */
-window.addEventListener('load', function(){
-  setTimeout(function(){
-    var dl = document.getElementById('dl');
-    if (!dl) return;
-    /* clique programático no link com atributo download */
-    dl.click();
-    var s = document.getElementById('status');
-    if (s) s.innerHTML = '<span class="dot"></span>Download iniciado · Verifique sua pasta de Downloads';
-  }, 600);
-});
+/**
+ * Fluxo:
+ *  1. Página carrega → aguarda 600ms → dispara o download automaticamente.
+ *  2. Após ~1.2s (dando tempo do navegador processar o download), o card de
+ *     download é substituído pelo card do grupo de WhatsApp.
+ *  3. O botão de download manual também dispara a troca (usuário que clicou
+ *     antes do auto-trigger).
+ */
+(function(){
+  var dl = document.getElementById('dl');
+  var dlCard = document.getElementById('dlCard');
+  var wppCard = document.getElementById('wppCard');
+  var status = document.getElementById('status');
+  var swapped = false;
 
-/* Tracking opcional (Pixel/GA) — confirma a conversão na página de obrigado */
-try { if (window.fbq) fbq('track', 'CompleteRegistration'); } catch(e){}
-try { if (window.gtag) gtag('event', 'sign_up', {method:'LP_Dicionario'}); } catch(e){}
+  function swapToWpp(){
+    if (swapped) return;
+    swapped = true;
+    if (status) status.innerHTML = '<span class="dot"></span>Download iniciado';
+    // Pequeno delay pro usuário perceber que baixou antes do swap
+    setTimeout(function(){
+      if (dlCard) dlCard.classList.add('hidden');
+      if (wppCard) wppCard.classList.remove('hidden');
+      // Tracking opcional (Pixel/GA4) — fica pronto pra quando instalar
+      try{if(window.fbq)fbq('track','Lead',{content_name:'Dicionario_Download'});}catch(e){}
+      try{if(window.gtag)gtag('event','file_download',{file_name:'Dicionario_Contabil_Fluencia.pdf'});}catch(e){}
+    }, 1200);
+  }
+
+  // Click manual no botão também troca o card
+  if (dl) {
+    dl.addEventListener('click', function(){
+      swapToWpp();
+    });
+  }
+
+  // Auto-trigger do download
+  window.addEventListener('load', function(){
+    setTimeout(function(){
+      if (!dl) return;
+      dl.click();
+    }, 600);
+  });
+
+  // "Agora não, obrigado" — esconde o card do WhatsApp
+  var skip = document.getElementById('skipWpp');
+  if (skip) {
+    skip.addEventListener('click', function(ev){
+      ev.preventDefault();
+      if (wppCard) wppCard.classList.add('hidden');
+    });
+  }
+})();
 </script>
 
 </body>
