@@ -15,13 +15,11 @@ body{font-family:'Montserrat',sans-serif;background:var(--azul);color:var(--bran
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes fadeSwap{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── HEADER (logo igual ao da LP principal) ── */
+/* ── HEADER ── */
 header{background:rgba(27,42,74,0.98);backdrop-filter:blur(12px);border-bottom:1px solid rgba(200,168,75,0.2);padding:18px 5%;display:flex;align-items:center;}
-.logo{text-decoration:none;display:flex;align-items:center;gap:12px;}
-.logo-mark{width:42px;height:42px;background:var(--azul);border:1.5px solid var(--dourado);border-radius:3px;display:flex;align-items:center;justify-content:center;font-family:'Source Serif 4',serif;font-weight:600;font-style:italic;color:var(--dourado);font-size:24px;line-height:1;}
-.logo-txt{display:flex;flex-direction:column;line-height:1.1;}
-.logo-txt .n1{font-size:14px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--branco);}
-.logo-txt .n2{font-size:9px;font-weight:600;letter-spacing:3.2px;text-transform:uppercase;color:var(--dourado);margin-top:3px;}
+.logo{display:inline-flex;align-items:center;}
+.logo img{height:56px;width:auto;display:block;}
+@media(max-width:600px){.logo img{height:44px;}}
 
 main{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 5%;}
 .box{max-width:640px;width:100%;text-align:center;}
@@ -88,9 +86,6 @@ footer{padding:20px 5%;text-align:center;font-size:11px;color:rgba(255,255,255,0
 /* ── MOBILE ── */
 @media(max-width:600px){
   header{padding:14px 5%;}
-  .logo-mark{width:38px;height:38px;font-size:22px;}
-  .logo-txt .n1{font-size:12px;}
-  .logo-txt .n2{font-size:8px;}
   .socials{flex-direction:column;align-items:center;}
   .social-btn{width:100%;max-width:260px;}
   .card,.method{padding:26px 20px;}
@@ -101,11 +96,7 @@ footer{padding:20px 5%;text-align:center;font-size:11px;color:rgba(255,255,255,0
 
 <header>
   <a class="logo" href="https://fluenciacontabil.com.br" target="_blank" rel="noopener">
-    <div class="logo-mark">F</div>
-    <div class="logo-txt">
-      <span class="n1">Fluência</span>
-      <span class="n2">Contábil</span>
-    </div>
+    <img src="logo.png" alt="Fluência Contábil">
   </a>
 </header>
 
