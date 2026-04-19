@@ -608,13 +608,13 @@ function getUTMs(){
 }
 
 /* ── Form validation + submit ──
-   INTEGRAÇÕES:
-   - GSHEET_ENDPOINT  → URL do Web App publicado pelo Google Apps Script
-                        (ver arquivo gsheet_endpoint.gs no repositório).
-   - MAILERLITE_ENDPOINT → endpoint do grupo "Dicionario_Contabil_Leads".
-   Os dois rodam em paralelo. Enquanto vazios, o lead é só logado e o usuário vai para obrigado.html. */
-var GSHEET_ENDPOINT='https://script.google.com/macros/s/AKfycbzn7NkJAEr_zVz_POnd4JeugXdDe-CGLbhqhXn4F27lkASxbTkNOGB_x5C1n7hFK-jUQg/exec';      // ex: 'https://script.google.com/macros/s/XXXXX/exec'
-var MAILERLITE_ENDPOINT='';  // ex: 'https://assets.mailerlite.com/jsonp/XXXX/forms/YYYY/subscribe'
+   INTEGRAÇÃO:
+   - GSHEET_ENDPOINT → endpoint UNIFICADO (mesmo do site fluenciacontabil.com.br).
+                        Apps Script grava na planilha "LEADS Fluência Contábil"
+                        e posta server-side no MailerLite (group Lead Magnet - Dicionário).
+   - MAILERLITE_ENDPOINT deprecated — integração agora é server-side via Apps Script. */
+var GSHEET_ENDPOINT='https://script.google.com/macros/s/AKfycbx8lWrX5F0IByv0JEJ0iBGPjtLto7f2VxDHIh0uT0gZtvoj8EDVx0NFiriou-Dt0cxh/exec';
+var MAILERLITE_ENDPOINT='';  // deprecated — não usar, integração MailerLite é server-side
 
 function onlyDigits(s){var d=(s||'').replace(/\D+/g,'');if(d.length>11&&d.slice(0,2)==='55')d=d.slice(2);return d;}
 
@@ -638,7 +638,7 @@ function maskPhone(input){
   });
 }
 
-function wireForm(formId,nomeId,emailId,telId,errId){
+function wireForm(formId,nomeId,emailId,telId,errId,origem){
   var form=document.getElementById(formId);if(!form)return;
   var telEl=document.getElementById(telId);if(telEl)maskPhone(telEl);
   form.addEventListener('submit',function(ev){
@@ -650,16 +650,18 @@ function wireForm(formId,nomeId,emailId,telId,errId){
     if(!validateForm(nome,email,telefone,errEl))return;
 
     try{if(window.fbq)fbq('track','Lead');}catch(e){}
-    try{if(window.gtag)gtag('event','generate_lead',{method:'LP_Dicionario'});}catch(e){}
+    try{if(window.gtag)gtag('event','generate_lead',{method:origem||'lead_magnet_dicionario'});}catch(e){}
 
     var payload=Object.assign({
       nome:nome.trim(),
       email:email.trim().toLowerCase(),
       telefone:telefone.trim(),
       telefone_digits:onlyDigits(telefone),
-      origem:'LP_Dicionario',
+      origem:origem||'lead_magnet_dicionario',
       timestamp:new Date().toISOString(),
-      pagina:window.location.href
+      pagina:window.location.pathname+window.location.search,
+      referrer:document.referrer||'',
+      dispositivo:(window.innerWidth<=720)?'Mobile':'Desktop'
     },getUTMs());
 
     var promises=[];
@@ -685,8 +687,8 @@ function wireForm(formId,nomeId,emailId,telId,errId){
     setTimeout(function(){window.location.href='obrigado.html';},4000);
   });
 }
-wireForm('leadFormTop','nome1','email1','tel1','err1');
-wireForm('leadFormBot','nome2','email2','tel2','err2');
+wireForm('leadFormTop','nome1','email1','tel1','err1','dicionario_form_top');
+wireForm('leadFormBot','nome2','email2','tel2','err2','dicionario_form_bottom');
 </script>
 
 <!-- ══════════════════════════════════════════════════════════

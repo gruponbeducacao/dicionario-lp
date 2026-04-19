@@ -6,8 +6,15 @@
 (function () {
   'use strict';
 
-  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbzn7NkJAEr_zVz_POnd4JeugXdDe-CGLbhqhXn4F27lkASxbTkNOGB_x5C1n7hFK-jUQg/exec';
+  // Endpoint UNIFICADO (compartilhado com o site principal fluenciacontabil.com.br)
+  // Apps Script roteia por `origem` e também posta no MailerLite server-side.
+  var ENDPOINT = 'https://script.google.com/macros/s/AKfycbx8lWrX5F0IByv0JEJ0iBGPjtLto7f2VxDHIh0uT0gZtvoj8EDVx0NFiriou-Dt0cxh/exec';
   var SUCCESS_URL = 'obrigado.html';
+
+  function getUrlParam(name) {
+    try { return new URLSearchParams(window.location.search).get(name) || ''; }
+    catch (e) { return ''; }
+  }
 
   var KEYS = {
     subscribed: 'fc_ec_dic_subscribed',
@@ -37,7 +44,16 @@
   function markClosed(key) { safeLocalSet(key, String(Date.now())); }
 
   function submitEmail(email, origem) {
-    var data = new URLSearchParams({ email: email, origem: origem });
+    var data = new URLSearchParams({
+      email: email,
+      origem: origem,
+      pagina: window.location.pathname + window.location.search,
+      referrer: document.referrer || '',
+      utm_source: getUrlParam('utm_source'),
+      utm_medium: getUrlParam('utm_medium'),
+      utm_campaign: getUrlParam('utm_campaign'),
+      dispositivo: (window.innerWidth <= 720) ? 'Mobile' : 'Desktop'
+    });
     return fetch(ENDPOINT, { method: 'POST', body: data, mode: 'no-cors' });
   }
   function isValidEmail(v) { return !!v && /\S+@\S+\.\S+/.test(v); }
