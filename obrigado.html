@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
 <title>Seu Dicionário Contábil — Download em andamento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
 <style>
 :root{--azul:#1B2A4A;--azul-med:#2A3F6F;--dourado:#C8A84B;--dourado-esc:#A68A3E;--cream:#FBF6E9;--branco:#FFFFFF;}
@@ -90,13 +92,20 @@ footer{padding:20px 5%;text-align:center;font-size:11px;color:rgba(255,255,255,0
   .social-btn{width:100%;max-width:260px;}
   .card,.method{padding:26px 20px;}
 }
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms !important;animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;scroll-behavior:auto !important;
+  }
+}
 </style>
 </head>
 <body>
 
 <header>
   <a class="logo" href="https://fluenciacontabil.com.br" target="_blank" rel="noopener">
-    <img src="logo.png" alt="Fluência Contábil">
+    <picture><source srcset="logo.webp" type="image/webp"><img src="logo.png" alt="Fluência Contábil" loading="eager" decoding="async"></picture>
   </a>
 </header>
 
