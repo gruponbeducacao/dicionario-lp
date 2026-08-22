@@ -8,7 +8,7 @@
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-WF6P82HX');</script>
+})(window,document,'script','dataLayer','GTM-MGQFHR5J');</script>
 <!-- End Google Tag Manager -->
 <meta name="description" content="Baixe grátis o Dicionário Contábil da Fluência Contábil: 400+ definições explicados de forma didática, pensados para quem estuda para concursos fiscais, controle e tribunais de contas.">
 <link rel="icon" type="image/png" href="favicon.png">
@@ -408,7 +408,7 @@ form.lead-form button:hover, .btn-cta-red:hover, .mob-btn:hover, .nav-btn:hover 
 </head>
 <body>
 <!-- Google Tag Manager (noscript) -->
-<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WF6P82HX"
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MGQFHR5J"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
 
@@ -751,6 +751,18 @@ function wireForm(formId,nomeId,emailId,telId,errId,origem){
       referrer:document.referrer||'',
       dispositivo:(window.innerWidth<=720)?'Mobile':'Desktop'
     },getUTMs());
+
+    // Avisa o GTM que houve captura — mesmo nome de evento do site, para
+    // que o Lead tenha um significado só em todas as propriedades.
+    //
+    // Aqui, e não no submit do formulário: neste ponto o payload já está
+    // montado e a captura é certa. E antes dos fetch e do redirect para
+    // obrigado.html, que só acontece depois das promises ou de 4s — tempo de
+    // sobra para o Pixel despachar, que usa beacon e sobrevive à navegação.
+    try {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: 'lead_capturado', origem: 'dicionario_lp' });
+    } catch (e) {}
 
     var promises=[];
     if(GSHEET_ENDPOINT){
