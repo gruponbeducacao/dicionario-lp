@@ -500,10 +500,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <p class="venda-amostra-nota">É assim nos <strong>400+ verbetes</strong> · 125 páginas · índice clicável</p>
     </div>
 
+    <div class="venda-bonus">
+      <span class="venda-bonus-tag">Vem junto</span>
+      <p><strong>3 dias dentro da plataforma.</strong> Assista às 44 videoaulas de Contabilidade
+      Geral e Avançada, resolva questões e use o Mapa de Incidência e o Meu Edital. Os PDFs das
+      aulas não acompanham — o Dicionário, sim, e ele é seu para sempre.</p>
+    </div>
+
     <div class="venda-preco">
-      <span class="venda-preco-rot">Pagamento único</span>
-      <div class="venda-preco-val">R$ 47</div>
-      <span class="venda-preco-obs">O material fica com você. Não expira, não renova.</span>
+      <span class="venda-preco-rot">Em até</span>
+      <div class="venda-preco-val">11× R$ 5,22</div>
+      <span class="venda-preco-avista">ou <strong>R$ 47</strong> à vista · total parcelado R$ 57,42</span>
+      <span class="venda-preco-obs">Sem assinatura. O material fica com você — não expira, não renova.</span>
     </div>
 
     <a class="btn-glow venda-cta" href="https://pay.kiwify.com.br/pBSgGdf" data-cta="hero">QUERO O DICIONÁRIO</a>
@@ -649,13 +657,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="cta-bullet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Explicações diretas, sem juridiquês</div>
         <div class="cta-bullet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Organizado pelo que as bancas cobram</div>
         <div class="cta-bullet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Acesso imediato após a compra</div>
+        <div class="cta-bullet"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>3 dias de acesso à plataforma, junto</div>
       </div>
     </div>
 
     <div style="background:var(--branco);border:1px solid rgba(27,42,74,0.1);border-radius:6px;padding:40px 32px;box-shadow:0 20px 50px rgba(27,42,74,0.08);">
+      <div class="venda-bonus venda-bonus-claro">
+        <span class="venda-bonus-tag">Vem junto</span>
+        <p><strong>3 dias dentro da plataforma</strong> — videoaulas, questões, Mapa de Incidência
+        e Meu Edital. Os PDFs das aulas não acompanham.</p>
+      </div>
       <div class="venda-preco venda-preco-claro">
-        <span class="venda-preco-rot">Pagamento único</span>
-        <div class="venda-preco-val">R$ 47</div>
+        <span class="venda-preco-rot">Em até</span>
+        <div class="venda-preco-val">11× R$ 5,22</div>
+        <span class="venda-preco-avista">ou <strong>R$ 47</strong> à vista · total parcelado R$ 57,42</span>
         <span class="venda-preco-obs">125 páginas · 400+ termos · PDF</span>
       </div>
       <a class="btn-glow venda-cta" href="https://pay.kiwify.com.br/pBSgGdf" data-cta="rodape">QUERO O DICIONÁRIO</a>
@@ -871,13 +886,45 @@ wireForm('leadFormBot','nome2','email2','tel2','err2','dicionario_form_bottom');
   }
   .venda-amostra-nota strong { color: rgba(255,255,255,.88); font-weight: 700; }
 
+  /* Preço parcelado: o à vista e o total NUNCA saem de perto do 11×. Não é
+     escrúpulo decorativo — Decreto 5.903/2006 e art. 52 do CDC pedem o preço
+     à vista junto da oferta parcelada, e esconder que o parcelado custa
+     R$ 10,42 a mais é o tipo de coisa que vira reclamação depois. */
+  .venda-preco-avista {
+    display: block; font-size: 13px; line-height: 1.5; margin-bottom: 8px;
+    color: rgba(255,255,255,.72);
+  }
+  .venda-preco-avista strong { color: #fff; font-weight: 700; }
+  .venda-preco-claro .venda-preco-avista { color: rgba(27,42,74,.72); }
+  .venda-preco-claro .venda-preco-avista strong { color: #1B2A4A; }
+
+  /* O bônus da degustação. Selo + fundo, sem fio colorido na lateral —
+     é a regra da marca para card e banner. */
+  .venda-bonus {
+    display: flex; flex-direction: column; gap: 7px; text-align: left;
+    background: rgba(200,168,75,.10); border: 1px solid rgba(200,168,75,.28);
+    border-radius: 6px; padding: 13px 15px; margin-bottom: 20px;
+  }
+  .venda-bonus-tag {
+    align-self: flex-start; font-size: 10px; font-weight: 800; letter-spacing: .14em;
+    text-transform: uppercase; color: #14203A; background: #C8A84B;
+    border-radius: 3px; padding: 3px 8px;
+  }
+  .venda-bonus p {
+    margin: 0; font-size: 12.5px; line-height: 1.55; color: rgba(255,255,255,.78);
+  }
+  .venda-bonus strong { color: #fff; font-weight: 700; }
+  .venda-bonus-claro { background: rgba(200,168,75,.13); }
+  .venda-bonus-claro p { color: rgba(27,42,74,.78); }
+  .venda-bonus-claro strong { color: #1B2A4A; }
+
   .venda-preco { text-align: center; margin-bottom: 22px; }
   .venda-preco-rot {
     display: block; font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
     color: rgba(255,255,255,.55); margin-bottom: 6px;
   }
   .venda-preco-val {
-    font-size: 56px; line-height: 1; font-weight: 800; color: #C8A84B; margin-bottom: 10px;
+    font-size: 44px; line-height: 1.05; font-weight: 800; color: #C8A84B; margin-bottom: 8px;
   }
   .venda-preco-obs {
     display: block; font-size: 13px; line-height: 1.5; color: rgba(255,255,255,.62);
@@ -893,23 +940,23 @@ wireForm('leadFormBot','nome2','email2','tel2','err2','dicionario_form_bottom');
   a.venda-cta {
     display: block; width: 100%; box-sizing: border-box;
     padding: 19px 24px; border: 0; border-radius: 6px;
-    background: linear-gradient(180deg, #D6B95C 0%, #C8A84B 100%);
-    color: #14203A; text-align: center; text-decoration: none;
+    background: #C0392B;
+    color: #fff; text-align: center; text-decoration: none;
     font-size: 15px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
-    box-shadow: 0 10px 26px rgba(200,168,75,.28);
-    transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+    box-shadow: 0 10px 26px rgba(192,57,43,.30);
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
     cursor: pointer;
   }
   a.venda-cta:hover, a.venda-cta:focus-visible {
     transform: translateY(-2px);
-    box-shadow: 0 16px 34px rgba(200,168,75,.38);
-    filter: brightness(1.04);
-    color: #14203A;
+    background: #A93226;
+    box-shadow: 0 16px 34px rgba(192,57,43,.40);
+    color: #fff;
   }
   a.venda-cta:active { transform: translateY(0); }
 
   @media (max-width: 640px) {
-    .venda-preco-val { font-size: 46px; }
+    .venda-preco-val { font-size: 38px; }
     a.venda-cta { padding: 17px 20px; font-size: 14px; }
   }
 </style>
