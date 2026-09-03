@@ -263,6 +263,31 @@ footer{background:#0E1929;padding:60px 5% 32px;}
 }
 /* .hero-dramatic > * removido — sobrescrevia position:absolute dos decorativos .hero-bg/.hero-glow e quebrava o grid */
 .hero-dramatic h1{text-shadow:0 2px 20px rgba(0,0,0,0.4),0 1px 2px rgba(0,0,0,0.3);}
+
+/* ── HERO COM VSL (03/09/2026) ── */
+#hero.hero-vsl{grid-template-columns:1fr;min-height:auto;}
+.hero-vsl-inner{position:relative;z-index:2;max-width:1040px;margin:0 auto;padding:72px 5% 64px;display:flex;flex-direction:column;align-items:center;text-align:center;}
+.hero-vsl .hero-badge{margin-bottom:24px;}
+.hero-vsl .hero-title{margin-bottom:16px;}
+.hero-vsl .hero-sub{max-width:640px;margin:0 auto 30px;}
+.vsl-frame{position:relative;width:100%;max-width:960px;aspect-ratio:16/9;background:#0E1929;border-radius:8px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 0 1px rgba(200,168,75,.35);}
+.vsl-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;}
+a.vsl-cta{display:block;width:100%;max-width:520px;box-sizing:border-box;margin:30px auto 22px;padding:19px 24px;border-radius:6px;background:#C0392B;color:#fff;text-align:center;text-decoration:none;font-size:15px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;transition:transform .15s ease,background .15s ease;}
+a.vsl-cta:hover,a.vsl-cta:focus-visible{background:#A93226;color:#fff;transform:translateY(-2px);}
+.hero-vsl .hero-trust{justify-content:center;}
+/* a amostra que desceu da hero: mesmo visual do card, agora em duas colunas */
+.amostra-sec{padding:72px 5%;background:var(--azul-med);position:relative;}
+.amostra-inner{max-width:1040px;margin:0 auto;display:grid;grid-template-columns:1.15fr 1fr;gap:40px;align-items:start;}
+.amostra-sec .venda-amostra-rot{font-size:12px;margin-bottom:12px;}
+.amostra-sec .verbete{font-size:14.5px;padding:20px 22px;}
+.amostra-sec .verbete-titulo{font-size:18px;}
+.amostra-sec .verbete-titulo span{font-size:13px;}
+.amostra-sec .venda-amostra-nota{font-size:13px;margin-top:14px;}
+.amostra-sec .venda-paginas{margin-top:0;gap:8px;}
+.amostra-sec .venda-bonus{margin:18px 0 0;padding:16px 18px;}
+.amostra-sec .venda-bonus p{font-size:13.5px;}
+@media(max-width:860px){.amostra-inner{grid-template-columns:1fr;gap:28px;}}
+@media(max-width:768px){.hero-vsl-inner{padding:36px 0 40px;}.hero-vsl .hero-sub{font-size:15px;}.vsl-frame{border-radius:6px;}a.vsl-cta{margin-top:22px;}}
 .cta-dramatic{
   background:
     radial-gradient(ellipse 90% 70% at 50% 120%, rgba(200,168,75,0.18) 0%, transparent 60%),
@@ -451,67 +476,71 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <a href="#cta-final" class="mob-btn">QUERO O DICIONÁRIO</a>
 </div>
 
-<!-- ════════ HERO ════════ -->
-<section id="hero" class="hero-dramatic">
+<!-- ════════ HERO ════════
+     VSL no topo (03/09/2026). O vídeo ocupa o lugar da coluna direita. A amostra do
+     verbete Goodwill, as páginas e o bônus DESCERAM para a seção .amostra-sec logo
+     abaixo: eram a única prova de conteúdo acima da dobra e não podem sumir.
+     O botão sob o vídeo rola até #cta-final (preço só no fechamento) e NÃO leva a
+     classe .venda-cta: ela é o gatilho do InitiateCheckout no GTM, e um clique de
+     rolagem não é início de checkout. -->
+<section id="hero" class="hero-dramatic hero-vsl">
   <div class="hero-bg bg-grid"></div>
   <div class="hero-glow"></div>
-  <div class="hero-logo-wrap"><img src="assets/img/hero-dicionario.png" alt="" class="hero-logo-bg"></div>
 
-  <div class="hero-left">
+  <div class="hero-vsl-inner">
     <div class="hero-badge"><div class="hero-badge-dot"></div><span>Edição 2026 · 400+ termos</span></div>
     <h1 class="hero-title">Decorar contabilidade<br><em>NÃO</em> vai te fazer<br>passar no concurso.</h1>
-    <p class="hero-sub">Mais de <strong>400 termos</strong> da contabilidade explicados de forma direta, organizados pelo que as bancas cobram. São 125 páginas para quem estuda, sabe a matéria — e mesmo assim trava na hora de entender o que a questão está pedindo.</p>
+    <p class="hero-sub hero-vsl-sub">Em 4 minutos, o Prof. Vinícius Ferraz mostra por que você trava numa <strong>palavra</strong>, não no cálculo — e o que tem dentro do Dicionário.</p>
+
+    <div class="vsl-frame">
+      <iframe id="panda-247518ef-145a-4ee7-90ab-846fcd7a65f8" src="https://player-vz-7867cfdb-be1.tv.pandavideo.com.br/embed/?v=247518ef-145a-4ee7-90ab-846fcd7a65f8" style="border:none;" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture" allowfullscreen="true" fetchpriority="high" title="Dicionário Contábil — o vídeo de 4 minutos do Prof. Vinícius Ferraz"></iframe>
+    </div>
+
+    <a class="btn-glow vsl-cta" href="#cta-final">QUERO O DICIONÁRIO</a>
     <div class="hero-trust">
       <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Pagamento único</div>
       <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>7 dias de garantia</div>
       <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Acesso imediato</div>
     </div>
   </div>
+</section>
 
-  <aside class="hero-right" id="form-topo">
-    <div class="form-mockup" aria-hidden="true">
-      <picture><source srcset="logo.webp" type="image/webp"><img class="mock-logo" src="logo.png" alt=""></picture>
-      <div class="mock-sep"></div>
-      <div class="mock-mid">Dicionário<span>Contábil</span></div>
-      <div class="mock-bot">400+ definições · edição 2026</div>
-    </div>
-    <!-- Entrou no lugar do slot do VSL, que nunca foi gravado.
-         O verbete é TEXTO, não imagem de página: no aside estreito uma
+<!-- ════════ AMOSTRA (veio da coluna direita da hero) ════════ -->
+<!-- Veio da coluna direita da hero em 03/09/2026, quando o VSL entrou no topo.
+         O verbete é TEXTO, não imagem de página: numa coluna estreita uma
          miniatura de A4 fica ilegível, e miniatura ilegível não prova nada.
          Em texto ele é legível em qualquer largura, pesa zero e é indexável.
          Conteúdo VERBATIM da página 31 do PDF (verbete Goodwill) — se o PDF
          for reeditado, reconferir aqui antes de republicar.
          As miniaturas abaixo têm outro papel: não são para ler, são a prova
          de que as 125 páginas são diagramadas assim. -->
-    <div class="venda-amostra">
+<section class="amostra-sec" id="amostra">
+  <div class="amostra-inner">
+    <div class="amostra-texto">
       <p class="venda-amostra-rot">Um verbete inteiro, como você vai receber</p>
-
       <article class="verbete">
         <h3 class="verbete-titulo">Goodwill <span>(Ágio por Rentabilidade Futura)</span></h3>
         <p><strong>O que é:</strong> Valor pago acima do valor justo dos ativos líquidos identificáveis na aquisição de um negócio.</p>
         <p><strong>Classificação:</strong> ANC — Intangível.</p>
         <p class="verbete-dica"><strong>💡 Dica de prova:</strong> O goodwill <strong>NÃO é amortizado</strong> — mas deve ser testado anualmente para impairment (CPC 01). Esse é um dos pontos mais cobrados de contabilidade avançada: amortiza ou não? NÃO amortiza.</p>
       </article>
-
+      <p class="venda-amostra-nota">É assim nos <strong>400+ verbetes</strong> · 125 páginas · índice clicável</p>
+    </div>
+    <div class="amostra-lado">
       <div class="venda-paginas">
           <picture><source srcset="assets/paginas/pag-indice.webp" type="image/webp"><img src="assets/paginas/pag-indice.jpg" alt="Índice remissivo alfabético do Dicionário Contábil" loading="lazy" decoding="async" width="240" height="339"></picture>
           <picture><source srcset="assets/paginas/pag-verbetes.webp" type="image/webp"><img src="assets/paginas/pag-verbetes.jpg" alt="Página de verbetes sobre natureza das contas e passivo" loading="lazy" decoding="async" width="240" height="339"></picture>
           <picture><source srcset="assets/paginas/pag-intangiveis.webp" type="image/webp"><img src="assets/paginas/pag-intangiveis.jpg" alt="Página de verbetes sobre ativos intangíveis" loading="lazy" decoding="async" width="240" height="339"></picture>
           <picture><source srcset="assets/paginas/pag-provisoes.webp" type="image/webp"><img src="assets/paginas/pag-provisoes.jpg" alt="Página de verbetes sobre provisões" loading="lazy" decoding="async" width="240" height="339"></picture>
       </div>
-      <p class="venda-amostra-nota">É assim nos <strong>400+ verbetes</strong> · 125 páginas · índice clicável</p>
-    </div>
-
-    <div class="venda-bonus">
+      <div class="venda-bonus">
       <span class="venda-bonus-tag">Vem junto</span>
       <p><strong>Vem junto a Aula 01, em vídeo e em PDF.</strong> Método das Partidas Dobradas — a
       base de toda a contabilidade. Você tem 3 dias de acesso à plataforma para assistir, baixar o
       material da aula e ver por dentro como o curso funciona.</p>
     </div>
-
-    <a class="btn-glow btn-ancora" href="#cta-final">VER A OFERTA</a>
-    <p class="form-legal">Pagamento único, sem assinatura · Acesso imediato · 7 dias de garantia</p>
-  </aside>
+    </div>
+  </div>
 </section>
 
 <!-- ════════ PARA QUEM É (fundo azul) ════════ -->
