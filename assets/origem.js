@@ -23,7 +23,7 @@
      que vier do anúncio (o criativo) vai para utm_term, quando utm_term
      estiver vazio — assim os dois convivem.
    · Os cookies da Meta (_fbp e _fbc) vão para a Kiwify em s1 e s2, e a página
-     em s3. A Kiwify devolve os três no webhook, e é com eles que o servidor
+     (host + caminho) em s3. A Kiwify devolve os três no webhook, e é com eles que o servidor
      manda a compra de volta para a Meta com o mesmo navegador que clicou no
      anúncio. Sem isso o casamento é só por e-mail, e a Meta perde a venda de
      quem comprou com outro e-mail ou pagou o pix mais tarde.
@@ -109,7 +109,7 @@
       var fbcValor = fbc(origem);
       if (fbp) u.searchParams.set('s1', fbp);
       if (fbcValor) u.searchParams.set('s2', fbcValor);
-      u.searchParams.set('s3', window.location.pathname);
+      u.searchParams.set('s3', window.location.host + window.location.pathname);
 
       a.href = u.toString();
     } catch (e) {}
