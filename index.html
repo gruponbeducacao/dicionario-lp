@@ -481,7 +481,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
      verbete Goodwill, as páginas e o bônus DESCERAM para a seção .amostra-sec logo
      abaixo: eram a única prova de conteúdo acima da dobra e não podem sumir.
      O botão sob o vídeo rola até #cta-final (preço só no fechamento) e NÃO leva a
-     classe .venda-cta: ela é o gatilho do InitiateCheckout no GTM, e um clique de
+     classe .venda-cta: o clique nela vira checkout_click no dataLayer (origem.js), e um clique de
      rolagem não é início de checkout. -->
 <section id="hero" class="hero-dramatic hero-vsl">
   <div class="hero-bg bg-grid"></div>
@@ -2492,71 +2492,12 @@ if(hamBtn&&mobMenu){
   }
 </style>
 
-<script>
-/* ════════════════════════════════════════════════════════════════════════
-   O REPASSE DO utm_campaign — a linha de que toda a medição depende.
-
-   O anúncio traz a pessoa para cá com ?utm_campaign=... na URL. O botão de
-   compra a manda para a Kiwify. Se esses parâmetros NÃO forem repassados no
-   pulo, a Kiwify registra a venda sem origem, o Gestão não consegue casá-la
-   com a campanha, e o painel mostra "0 vendas" para uma campanha que vendeu.
-
-   É uma falha silenciosa: nada dá erro, nada fica vermelho. Simplesmente se
-   conclui que o anúncio não funcionou.
-
-   O sessionStorage existe porque a pessoa pode navegar entre seções ou voltar
-   por um link interno, e a query string se perde no caminho — mas a origem
-   dela não mudou.
-   ═══════════════════════════════════════════════════════════════════════ */
-(function () {
-  'use strict';
-  var GUARDAR = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term','src','fbclid','gclid'];
-  var CHAVE = 'fc_origem';
-
-  function daUrl() {
-    var p = new URLSearchParams(window.location.search), fora = {};
-    GUARDAR.forEach(function (k) { var v = p.get(k); if (v) fora[k] = v; });
-    return fora;
-  }
-
-  function guardada() {
-    try { return JSON.parse(sessionStorage.getItem(CHAVE) || '{}'); } catch (e) { return {}; }
-  }
-
-  var origem = daUrl();
-  if (Object.keys(origem).length) {
-    // A URL sempre vence: se a pessoa voltou por outro anúncio, é o novo que vale.
-    try { sessionStorage.setItem(CHAVE, JSON.stringify(origem)); } catch (e) {}
-  } else {
-    origem = guardada();
-  }
-
-  var chaves = Object.keys(origem);
-  document.querySelectorAll('a.venda-cta').forEach(function (a) {
-    if (chaves.length) {
-      var u = new URL(a.href);
-      chaves.forEach(function (k) { u.searchParams.set(k, origem[k]); });
-      a.href = u.toString();
-    }
-    a.addEventListener('click', function () {
-      // Sinaliza a intenção de compra. O `fbq` só é chamado se existir: sem
-      // isso, um bloqueador de anúncio derrubaria a navegação junto.
-      try {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-          event: 'iniciar_checkout',
-          valor: 47.0,
-          moeda: 'BRL',
-          origem_do_botao: a.getAttribute('data-cta') || 'desconhecido'
-        });
-        if (typeof window.fbq === 'function') {
-          window.fbq('track', 'InitiateCheckout', { value: 47.0, currency: 'BRL' });
-        }
-      } catch (e) {}
-    });
-  });
-})();
-</script>
+<!-- A origem (utm_*, src, fbclid) vai da URL de entrada até o checkout, e os
+     cookies da Meta seguem em s1/s2. É o mesmo assets/origem.js do site
+     institucional: um arquivo só, para a regra não divergir entre as páginas.
+     O clique no botão vira `checkout_click` no dataLayer; o evento da Meta
+     (ClicouComprar) nasce no GTM, nunca aqui. -->
+<script src="assets/origem.js?v=20260905" defer></script>
 
 <script>
 /* Demo interativa da plataforma — portada de assinatura.html. */
