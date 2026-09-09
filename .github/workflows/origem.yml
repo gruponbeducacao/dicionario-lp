@@ -1,0 +1,19 @@
+name: Origem da visita e eventos
+on:
+  pull_request:
+    branches: [main, dev]
+  push:
+    branches: [main, dev]
+permissions:
+  contents: read
+jobs:
+  origem:
+    name: Preservar atribuição e evitar eventos duplicados
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test scripts/origem.test.mjs
