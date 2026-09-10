@@ -487,16 +487,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="hero-bg bg-grid"></div>
   <div class="hero-glow"></div>
 
-  <div class="hero-vsl-inner">
+  <!-- Slot da VSL. O receptor (assets/vsl.js, servido pelo site principal) exige
+       este id, o iframe como #heroVslFrame e o CTA dentro do slot. A duracao vem
+       do arquivo entregue (250,2 s) e o pitch do Bloco 7 do roteiro, "Preco,
+       garantia e o que nao volta", que comeca em 3:27 = 207 s. -->
+  <div class="hero-vsl-inner" id="heroVsl"
+       data-vsl-version="2026-09-03"
+       data-vsl-duration="250"
+       data-vsl-pitch="207"
+       data-vsl-content="dicionario_2026_09">
     <div class="hero-badge"><div class="hero-badge-dot"></div><span>Edição 2026 · 400+ termos</span></div>
     <h1 class="hero-title">Decorar contabilidade<br><em>NÃO</em> vai te fazer<br>passar no concurso.</h1>
     <p class="hero-sub hero-vsl-sub">Em 4 minutos, o Prof. Vinícius Ferraz mostra por que você trava numa <strong>palavra</strong>, não no cálculo — e o que tem dentro do Dicionário.</p>
 
     <div class="vsl-frame">
-      <iframe id="panda-247518ef-145a-4ee7-90ab-846fcd7a65f8" src="https://player-vz-7867cfdb-be1.tv.pandavideo.com.br/embed/?v=247518ef-145a-4ee7-90ab-846fcd7a65f8" style="border:none;" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture" allowfullscreen="true" fetchpriority="high" title="Dicionário Contábil — o vídeo de 4 minutos do Prof. Vinícius Ferraz"></iframe>
+      <iframe id="heroVslFrame" src="https://player-vz-7867cfdb-be1.tv.pandavideo.com.br/embed/?v=247518ef-145a-4ee7-90ab-846fcd7a65f8" style="border:none;" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture" allowfullscreen="true" fetchpriority="high" title="Dicionário Contábil — o vídeo de 4 minutos do Prof. Vinícius Ferraz"></iframe>
     </div>
 
-    <a class="btn-glow vsl-cta" href="#cta-final">QUERO O DICIONÁRIO</a>
+    <a class="btn-glow vsl-cta" href="#cta-final" data-fc-vsl-cta>QUERO O DICIONÁRIO</a>
     <div class="hero-trust">
       <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Pagamento único</div>
       <div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>7 dias de garantia</div>
@@ -2498,6 +2506,11 @@ if(hamBtn&&mobMenu){
      O clique no botão vira `checkout_click` no dataLayer; o evento da Meta
      (ClicouComprar) nasce no GTM, nunca aqui. -->
 <script src="assets/origem.js?v=20260909" defer></script>
+<!-- Receptor da VSL. Mora no site principal de proposito: e' o mesmo arquivo que a
+     assinatura.html usa, e corrigir num lugar so' evita duas copias divergindo.
+     Sem SRI porque o hash teria de ser reescrito aqui a cada edicao la', o que
+     anularia o motivo da escolha; a origem e' nosso proprio dominio. -->
+<script src="https://fluenciacontabil.com.br/assets/vsl.js?v=20260910" defer></script>
 
 <script>
 /* Demo interativa da plataforma — portada de assinatura.html. */
