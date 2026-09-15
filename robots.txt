@@ -1,0 +1,13 @@
+# O PDF entregue a quem compra mora em /entrega/ e não deve ser indexado.
+#
+# Não é proteção: quem tem o link baixa, e o mesmo arquivo já ficou meses
+# na raiz deste domínio sem cadastro nenhum. O que este bloqueio evita é o
+# arquivo voltar ao índice do Google e competir com a própria página de
+# venda — um anúncio de R$ 47 perdendo o clique para o próprio produto no
+# orgânico.
+#
+# O Disallow impede o rastreio, não a listagem. Para tirar do índice o que
+# já foi indexado, use a remoção de URL no Search Console — o robots.txt
+# sozinho não desindexa.
+User-agent: *
+Disallow: /entrega/

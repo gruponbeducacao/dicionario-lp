@@ -1,0 +1,10 @@
+_original/
+_build_placeholder_pdf.py
+.DS_Store
+Thumbs.db
+*.log
+
+# Produto pago nunca entra neste repositório público.
+# O PDF do Dicionário vazou assim: o que é pushado aqui fica servido por branch, SHA e ref de PR.
+entrega/
+*.pdf
