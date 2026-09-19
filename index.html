@@ -22,6 +22,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <meta property="og:locale" content="pt_BR">
 <meta name="twitter:card" content="summary_large_image">
 <title>Dicionário Contábil — Edição 2026 · Fluência Contábil</title>
+<link rel="stylesheet" href="./assets/vsl-overlay.css?v=20260918">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- Fontes da demo da plataforma: ela e uma replica da UI real, que usa
@@ -501,10 +502,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <p class="hero-sub hero-vsl-sub">Em 4 minutos, o Prof. Vinícius Ferraz mostra por que você trava numa <strong>palavra</strong>, não no cálculo — e o que tem dentro do Dicionário.</p>
 
     <div class="vsl-frame">
-      <iframe id="heroVslFrame" src="https://player-vz-7867cfdb-be1.tv.pandavideo.com.br/embed/?v=247518ef-145a-4ee7-90ab-846fcd7a65f8" style="border:none;" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture" allowfullscreen="true" fetchpriority="high" title="Dicionário Contábil — o vídeo de 4 minutos do Prof. Vinícius Ferraz"></iframe>
+      <iframe id="heroVslFrame" src="https://player-vz-7867cfdb-be1.tv.pandavideo.com.br/embed/?v=247518ef-145a-4ee7-90ab-846fcd7a65f8&amp;autoplay=false&amp;muted=false&amp;saveProgress=false&amp;hideControlsOnStart=false&amp;color=%23D62828&amp;controlsColor=%23FFFFFF&amp;controls=play,progress,current-time,volume,captions,settings,pip,fullscreen,airplay,cast,rewind,fast-forward&amp;pauseThumbnail=https%3A%2F%2Fdicionario.fluenciacontabil.com.br%2Fassets%2Fvsl-pausa-s1.png" style="border:none;" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture;fullscreen" allowfullscreen="true" fetchpriority="high" title="Dicionário Contábil — o vídeo de 4 minutos do Prof. Vinícius Ferraz"></iframe>
       <!-- O Panda precisa do contexto da página para registrar as UTMs da visita. -->
       <script src="https://player.pandavideo.com.br/embed.js"></script>
+      <!-- A prévia é local e silenciosa: não inicia o Panda nem os marcos da VSL. -->
+      <div class="fc-vsl-overlay fc-vsl-start" id="vslStartOverlay" aria-labelledby="vslStartTitle" hidden>
+        <div class="fc-vsl-scene" aria-hidden="true"><video id="vslTeaser" data-src="./assets/vsl-previa.mp4" poster="./assets/vsl-previa.jpg" muted loop playsinline preload="none" tabindex="-1" disablepictureinpicture></video></div>
+        <div class="fc-vsl-shade"></div>
+        <div class="fc-vsl-start-card">
+          <div class="fc-vsl-audio" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg></div>
+          <h2 id="vslStartTitle">O vídeo está <em>sem som.</em></h2>
+          <p class="fc-vsl-support">Ouça a explicação desde o início.</p>
+          <button type="button" aria-controls="heroVslFrame"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg><span>Ativar som e assistir</span></button>
+          <p class="fc-vsl-stamp">4min10s · Prof. Vinícius Ferraz</p>
+        </div>
+      </div>
+      <div class="fc-vsl-overlay fc-vsl-pause" id="vslPauseOverlay" aria-labelledby="vslPauseTitle" hidden>
+        <div class="fc-vsl-scene" aria-hidden="true"></div><div class="fc-vsl-shade"></div>
+        <div class="fc-vsl-pause-card">
+          <span class="fc-vsl-paused-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>Vídeo pausado</span>
+          <h2 id="vslPauseTitle">Vamos <em>continuar?</em></h2>
+          <p class="fc-vsl-support">Retome do ponto em que parou.</p>
+          <button type="button" aria-controls="heroVslFrame"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m8 5 11 7-11 7z"/></svg><span>Continuar vídeo</span></button>
+        </div>
+      </div>
     </div>
+    <p class="fc-vsl-status" id="vslOverlayStatus" role="status" aria-live="polite" hidden></p>
 
     <a class="btn-glow vsl-cta" href="#cta-final" data-fc-vsl-cta>QUERO O DICIONÁRIO</a>
     <div class="hero-trust">
@@ -2513,6 +2536,7 @@ if(hamBtn&&mobMenu){
      Sem SRI porque o hash teria de ser reescrito aqui a cada edicao la', o que
      anularia o motivo da escolha; a origem e' nosso proprio dominio. -->
 <script src="https://fluenciacontabil.com.br/assets/vsl.js?v=20260910" defer></script>
+<script src="./assets/vsl-overlay.js?v=20260918" defer></script>
 
 <script>
 /* Demo interativa da plataforma — portada de assinatura.html. */
