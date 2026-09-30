@@ -288,6 +288,30 @@ a.vsl-cta:hover,a.vsl-cta:focus-visible{background:#A93226;color:#fff;transform:
 .amostra-sec .venda-bonus p{font-size:13.5px;}
 @media(max-width:860px){.amostra-inner{grid-template-columns:1fr;gap:28px;}}
 @media(max-width:768px){.hero-vsl-inner{padding:36px 0 40px;}.hero-vsl .hero-sub{font-size:15px;}.vsl-frame{border-radius:6px;}a.vsl-cta{margin-top:22px;}}
+/* ── TRAVA NO VÍDEO (30/09/2026) — https://fluenciacontabil.com.br/assets/vsl-trava.js ──
+   Mesmo comportamento da assinatura.html: com <html class="vsl-trava">, a página é só o palco do
+   vídeo. Topo, menu, seções (inclusive a oferta de #cta-final) e rodapé somem e não há o que rolar;
+   o hero ocupa a altura da tela com selo + vídeo + aviso centralizados (no celular o vídeo fica no
+   meio da tela). Título, texto e botão do hero saem da vista como na assinatura, onde o vídeo fala
+   por eles; o h1 continua para leitor de tela. Sem a classe (sem JS, liberada), nada muda. */
+html.vsl-trava #topbar,html.vsl-trava #mainNav,html.vsl-trava .mobile-menu,
+html.vsl-trava body > section:not(#hero),html.vsl-trava body > footer{display:none !important;}
+html.vsl-trava #hero .hero-vsl-sub,html.vsl-trava #hero a.vsl-cta,html.vsl-trava #hero .hero-trust{display:none !important;}
+html.vsl-trava #hero .hero-title{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+html.vsl-trava body{padding-top:0 !important;}
+html.vsl-trava #hero{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;}
+html.vsl-trava #hero > .hero-vsl-inner{width:100%;padding-top:24px;padding-bottom:24px;}
+/* travada, o aviso precisa caber junto do vídeo na 1ª tela do computador */
+html.vsl-trava #hero .vsl-frame{max-width:min(960px,calc((100vh - 200px) * 16 / 9));}
+.vsl-trava-aviso{width:100%;max-width:460px;margin:16px auto 0;text-align:center;}
+.vsl-trava-aviso[hidden]{display:none;}
+/* o tempo que falta só aparece na pausa; invisível, o aviso segura o espaço e o vídeo não pula */
+.vsl-trava-aviso{visibility:hidden;opacity:0;transition:opacity .25s ease;}
+.vsl-trava-aviso[data-pausa]{visibility:visible;opacity:1;}
+.vsl-trava-txt{font-size:15px;font-weight:600;color:rgba(255,255,255,.88);text-wrap:balance;}
+.vsl-trava-barra{height:6px;margin-top:12px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.14);}
+.vsl-trava-barra span{display:block;width:0;height:100%;background:var(--dourado);transition:width .6s linear;}
+@media (prefers-reduced-motion: reduce){.vsl-trava-barra span,.vsl-trava-aviso{transition:none;}}
 .cta-dramatic{
   background:
     radial-gradient(ellipse 90% 70% at 50% 120%, rgba(200,168,75,0.18) 0%, transparent 60%),
@@ -488,22 +512,43 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div class="hero-glow"></div>
 
   <!-- Slot da VSL. O receptor (assets/vsl.js, servido pelo site principal) exige
-       este id, o iframe como #heroVslFrame e o CTA dentro do slot. A duracao vem
-       do arquivo entregue (250,2 s) e o pitch do Bloco 7 do roteiro, "Preco,
-       garantia e o que nao volta", que comeca em 3:27 = 207 s. -->
+       este id, o iframe como #heroVslFrame e o CTA dentro do slot.
+       VSL 1,25x (30/09/2026): a duração vem do arquivo entregue (VSL_Dicionario_1.25x.mp4,
+       200,2 s) e o pitch do Bloco 7 do roteiro, "Preço, garantia e o que não volta", que na
+       1,25x começa em 2:46 = 166 s (era 3:27 = 207 s na versão 1x, de 250,2 s).
+       Trava (assets/vsl-trava.js, também do site principal, o mesmo da assinatura.html):
+       data-vsl-trava = segundos de vídeo REALMENTE assistidos até liberar a página. 166 s = o
+       pitch (decisão do Vinícius, 30/09/2026): a oferta só aparece para quem assistiu até a
+       apresentação do Dicionário.
+       Trocar de vídeo = trocar juntos o id do ?v=, data-vsl-version, data-vsl-duration,
+       data-vsl-pitch, data-vsl-trava e o texto de #vslTrava. -->
   <div class="hero-vsl-inner" id="heroVsl"
-       data-vsl-version="2026-09-03"
-       data-vsl-duration="250"
-       data-vsl-pitch="207"
+       data-vsl-trava="166"
+       data-vsl-version="dicionario-125x-20260930"
+       data-vsl-duration="200.2"
+       data-vsl-pitch="166"
        data-vsl-content="dicionario_2026_09">
     <div class="hero-badge"><div class="hero-badge-dot"></div><span>Edição 2026 · 400+ termos</span></div>
     <h1 class="hero-title">Decorar contabilidade<br><em>NÃO</em> vai te fazer<br>passar no concurso.</h1>
-    <p class="hero-sub hero-vsl-sub">Em 4 minutos, o Prof. Vinícius Ferraz mostra por que você trava numa <strong>palavra</strong>, não no cálculo — e o que tem dentro do Dicionário.</p>
+    <p class="hero-sub hero-vsl-sub">Em 3 minutos, o Prof. Vinícius Ferraz mostra por que você trava numa <strong>palavra</strong>, não no cálculo — e o que tem dentro do Dicionário.</p>
 
     <div class="vsl-frame">
-      <iframe id="heroVslFrame" src="https://player-vz-7867cfdb-be1.tv.pandavideo.com.br/embed/?v=247518ef-145a-4ee7-90ab-846fcd7a65f8" style="border:none;" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture" allowfullscreen="true" fetchpriority="high" title="Dicionário Contábil — o vídeo de 4 minutos do Prof. Vinícius Ferraz"></iframe>
+      <!-- Vídeo VSL_Dicionario_1.25x (3:20), publicado no Panda como vídeo NOVO: o da versão 1x
+           (247518ef-…, 4:10) ficou intacto para comparar a retenção. O id do iframe continua
+           heroVslFrame (e não o panda-… do embed), porque vsl.js, vsl-trava.js e vsl-overlay.js
+           procuram por ele. -->
+      <iframe id="heroVslFrame" src="https://player-vz-7867cfdb-be1.tv.pandavideo.com.br/embed/?v=02cc6baa-16bb-46fa-9dea-69427c94c1fe" style="border:none;" allow="accelerometer;gyroscope;autoplay;encrypted-media;picture-in-picture" allowfullscreen="true" fetchpriority="high" title="Dicionário Contábil — o vídeo de 3 minutos do Prof. Vinícius Ferraz"></iframe>
       <!-- O Panda precisa do contexto da página para registrar as UTMs da visita. -->
       <script src="https://player.pandavideo.com.br/embed.js"></script>
+    </div>
+
+    <!-- trava da página no vídeo (assets/vsl-trava.js do site): mesmo markup e CSS da assinatura.html.
+         O aviso fica no layout o tempo todo (reserva o espaço, o vídeo não pula) e só aparece na
+         pausa ([data-pausa]). Sem JS, com #âncora na URL, ?semtrava=1, robô de busca, quem já
+         liberou ou player mudo por 15 s: não trava. -->
+    <div class="vsl-trava-aviso" id="vslTrava" aria-live="polite" hidden>
+      <p class="vsl-trava-txt" data-vsl-trava-txt>Assista mais 2:46 para liberar a página</p>
+      <div class="vsl-trava-barra" aria-hidden="true"><span data-vsl-trava-barra></span></div>
     </div>
 
     <a class="btn-glow vsl-cta" href="#cta-final" data-fc-vsl-cta>QUERO O DICIONÁRIO</a>
@@ -2513,6 +2558,9 @@ if(hamBtn&&mobMenu){
      Sem SRI porque o hash teria de ser reescrito aqui a cada edicao la', o que
      anularia o motivo da escolha; a origem e' nosso proprio dominio. -->
 <script src="https://fluenciacontabil.com.br/assets/vsl.js?v=20260910" defer></script>
+<!-- Trava da página no vídeo. Mesmo arquivo e mesma versão (?v=) da assinatura.html: ao mudar o
+     vsl-trava.js no site, subir o ?v= lá E aqui, senão esta página segue com a cópia em cache. -->
+<script src="https://fluenciacontabil.com.br/assets/vsl-trava.js?v=20260930e" defer></script>
 
 <script>
 /* Demo interativa da plataforma — portada de assinatura.html. */
