@@ -71,6 +71,8 @@ test('o aviso tem o markup que o componente procura, nasce oculto e o texto sem 
   const trava = Number(atributo(slotTag, 'data-vsl-trava'));
   // O script reescreve este texto; o estático é o que ele escreveria ao abrir.
   assert.equal(texto, `Assista mais ${mmss(trava)} para liberar a página`);
+  // Na pré-trava o aviso ainda está hidden: ele já segura o espaço, e o vídeo não pula quando o componente assume.
+  assert.match(css, /html\.vsl-trava \.vsl-trava-aviso\[hidden\]\s*\{[^}]*display:\s*block/);
 });
 
 test('a página carrega o componente do site principal, com cache-buster e defer', () => {
@@ -107,11 +109,11 @@ test('o hero não tem preço nem checkout: travada, nada de oferta fica à vista
 });
 
 // O script inline que segura o vídeo na tela quando a trava libera.
-function rolagem({ motivo = 'assistiu', topo = 514, altura = 362, tela = 768 } = {}) {
+function rolagem({ motivo = 'assistiu', topo = 514, altura = 362, tela = 768, preTravada = false } = {}) {
   const fonte = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1])
     .find(s => s.includes('vsl_pagina_liberada'));
   assert.ok(fonte, 'faltou o script que segura o vídeo na tela ao liberar');
-  const classes = new Set();
+  const classes = new Set(preTravada ? ['vsl-trava'] : []);
   let observador = null, observado = null;
   const rolou = [];
   const raiz = { classList: { contains: c => classes.has(c) } };
@@ -129,9 +131,9 @@ function rolagem({ motivo = 'assistiu', topo = 514, altura = 362, tela = 768 } =
   assert.equal(observado.alvo, raiz, 'o observer não observa o <html>');
   assert.ok(observado.opcoes.attributes !== false && [...(observado.opcoes.attributeFilter || [])].includes('class'),
     'o observer não observa o atributo class');
-  classes.add('vsl-trava'); observador();                       // a trava entra
+  if (!preTravada) { classes.add('vsl-trava'); observador(); }  // a trava entra (sem a pré-trava)
   classes.delete('vsl-trava');                                   // libera() tira a classe...
-  window.dataLayer.push({ event: 'vsl_pagina_liberada', motivo }); // ...e avisa o dataLayer
+  if (motivo !== 'desistiu_sem_evento') window.dataLayer.push({ event: 'vsl_pagina_liberada', motivo }); // ...e avisa o dataLayer
   observador();
   return JSON.parse(JSON.stringify(rolou)); // objetos do vm vêm de outro realm
 }
@@ -145,4 +147,77 @@ test('não rola quando o vídeo já cabe nem quando a trava abriu por falha do p
   assert.deepEqual(rolagem({ topo: 375, altura: 197, tela: 844 }), []); // celular: continua inteiro
   assert.deepEqual(rolagem({ motivo: 'player_mudo' }), []);
   assert.deepEqual(rolagem({ motivo: 'erro_player' }), []);
+});
+
+test('com a pré-trava do <head>, a classe já nasce no <html> e a rolagem continua valendo', () => {
+  assert.deepEqual(rolagem({ preTravada: true }), [{ top: 514 - (768 - 362) / 2, behavior: 'instant' }]);
+  assert.deepEqual(rolagem({ preTravada: true, motivo: 'desistiu_sem_evento' }), []);
+});
+
+// A pré-trava inline do <head>: põe a classe já no parse, com as exceções do componente, e desiste
+// se ele não assumir. Roda numa VM com DOM falso; os prazos são chamados à mão.
+function preTrava({ hash = '', search = '', ua = 'Mozilla/5.0 (iPhone)', liberada = false, slotOk = true } = {}) {
+  const fonte = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1]).find(s => s.includes("'desistiu'"));
+  assert.ok(fonte, 'faltou a pré-trava no <head>');
+  assert.ok(html.indexOf(fonte) < html.indexOf('</head>'), 'a pré-trava tem de ficar no <head>');
+  const classes = new Set(), ouvintes = {}, docOuvintes = {}, prazos = [];
+  const versao = atributo(slotTag, 'data-vsl-version');
+  const slot = { hidden: false, getAttribute: k => ({ 'data-vsl-trava': '166', 'data-vsl-version': slotOk ? versao : 'outra' })[k] ?? null };
+  const frame = { getAttribute: k => (k === 'src' ? 'https://player-vz-x.tv.pandavideo.com.br/embed/?v=abc' : null) };
+  const window = {
+    location: { hash, search }, navigator: { userAgent: ua },
+    localStorage: { getItem: k => (liberada && k === `fc_vsl_liberada:${versao}` ? '1' : null) },
+    addEventListener: (n, fn) => { ouvintes[n] = fn; },
+  };
+  const document = {
+    documentElement: { classList: { add: c => classes.add(c), remove: c => classes.delete(c), contains: c => classes.has(c) } },
+    getElementById: id => ({ heroVsl: slot, heroVslFrame: frame, vslTrava: {} })[id] ?? null,
+    addEventListener: (n, fn) => { docOuvintes[n] = fn; },
+  };
+  const ctx = vm.createContext({ window, document, Number, setTimeout: (fn, ms) => prazos.push({ fn, ms }) });
+  vm.runInContext(fonte, ctx);
+  return {
+    travada: () => classes.has('vsl-trava'), window,
+    domPronto: () => docOuvintes.DOMContentLoaded?.(),
+    carregou: () => ouvintes.load?.(),
+    vencePrazos: () => prazos.splice(0).forEach(p => p.fn()),
+    scriptFalhou: src => ouvintes.error?.({ target: { tagName: 'SCRIPT', src } }),
+    componenteAssume: () => { window.FC_VSL_TRAVA = true; },
+  };
+}
+
+test('pré-trava: trava já no parse e sai do caminho quando o componente assume', () => {
+  const r = preTrava();
+  assert.equal(r.travada(), true);
+  r.domPronto(); r.componenteAssume(); r.carregou(); r.vencePrazos();
+  assert.equal(r.travada(), true);
+  assert.equal(r.window.FC_VSL_TRAVA, true);
+});
+
+test('pré-trava: componente que não chega (lento demais, 404 ou erro) não deixa a página trancada', () => {
+  const lento = preTrava();
+  lento.domPronto(); lento.carregou(); lento.vencePrazos();
+  assert.equal(lento.travada(), false);
+  // o componente, se chegar depois, vê 'desistiu' e não tranca por cima
+  assert.equal(lento.window.FC_VSL_TRAVA, 'desistiu');
+  const r404 = preTrava();
+  r404.scriptFalhou('https://fluenciacontabil.com.br/assets/vsl-trava.js?v=20260930e');
+  assert.equal(r404.travada(), false);
+  const outro = preTrava();
+  outro.scriptFalhou('https://fluenciacontabil.com.br/assets/vsl-overlay.js?v=20260929');
+  assert.equal(outro.travada(), true, 'falha de outro script não mexe na trava');
+  const invalido = preTrava({ slotOk: false });
+  invalido.domPronto();
+  assert.equal(invalido.travada(), false);
+});
+
+test('pré-trava: mesmas exceções do componente (âncora, ?semtrava=1, robô, quem já liberou)', () => {
+  for (const opts of [{ hash: '#cta-final' }, { search: '?semtrava=1' }, { ua: 'Mozilla/5.0 (compatible; Googlebot/2.1)' },
+    { ua: 'Mozilla/5.0 HeadlessChrome/140' }, { liberada: true }]) {
+    assert.equal(preTrava(opts).travada(), false, JSON.stringify(opts));
+  }
+});
+
+test('sem JS a página é a de sempre: o <html> não nasce com a classe', () => {
+  assert.doesNotMatch(html.match(/<html[^>]*>/)[0], /vsl-trava/);
 });
