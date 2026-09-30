@@ -109,22 +109,28 @@ test('o hero não tem preço nem checkout: travada, nada de oferta fica à vista
 });
 
 // O script inline que segura o vídeo na tela quando a trava libera.
-function rolagem({ motivo = 'assistiu', topo = 514, altura = 362, tela = 768, preTravada = false } = {}) {
+function rolagem({ motivo = 'assistiu', topo = 514, altura = 362, tela = 768, preTravada = false, menu = 0, menuDepois = menu, recuo = 0 } = {}) {
   const fonte = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1])
     .find(s => s.includes('vsl_pagina_liberada'));
   assert.ok(fonte, 'faltou o script que segura o vídeo na tela ao liberar');
   const classes = new Set(preTravada ? ['vsl-trava'] : []);
   let observador = null, observado = null;
-  const rolou = [];
+  const rolou = [], depois = [];
   const raiz = { classList: { contains: c => classes.has(c) } };
   const window = {
     innerHeight: tela, pageYOffset: 0, dataLayer: [],
     MutationObserver: class { constructor(fn) { observador = fn; } observe(alvo, opcoes) { observado = { alvo, opcoes }; } },
-    scrollTo: o => rolou.push(o),
+    // rolar move o vídeo na tela, como no navegador; a segunda conferida (setTimeout) roda no fim
+    scrollTo: o => { rolou.push(o); window.pageYOffset = o.top; },
+    setTimeout: fn => depois.push(fn),
   };
   // Só o iframe do vídeo tem retângulo: o slot (#heroVsl) mede outra coisa.
-  const frame = { getBoundingClientRect: () => ({ top: topo, bottom: topo + altura, height: altura }) };
-  const document = { documentElement: raiz, getElementById: id => (id === 'heroVslFrame' ? frame : null) };
+  // Depois da 1ª rolagem a página esconde a faixa dourada: o cabeçalho encolhe (menuDepois) e o conteúdo sobe (recuo).
+  const y = () => topo - window.pageYOffset - (rolou.length ? recuo : 0);
+  const frame = { getBoundingClientRect: () => ({ top: y(), bottom: y() + altura, height: altura }) };
+  // O menu fixo (#mainNav) entra no cálculo quando está à vista; sem ele, o topo livre começa em 0.
+  const nav = { getClientRects: () => [1], getBoundingClientRect: () => ({ top: 0, bottom: rolou.length ? menuDepois : menu }) };
+  const document = { documentElement: raiz, getElementById: id => ({ heroVslFrame: frame, ...(menu ? { mainNav: nav } : {}) })[id] ?? null };
   vm.runInContext(fonte, vm.createContext({ window, document, Math }));
   // O observer tem de olhar a classe do <html>: com outro alvo ou outro atributo, nunca dispara no navegador.
   assert.ok(observador && observado, 'o script não instalou o observer (achou o #heroVslFrame?)');
@@ -135,6 +141,7 @@ function rolagem({ motivo = 'assistiu', topo = 514, altura = 362, tela = 768, pr
   classes.delete('vsl-trava');                                   // libera() tira a classe...
   if (motivo !== 'desistiu_sem_evento') window.dataLayer.push({ event: 'vsl_pagina_liberada', motivo }); // ...e avisa o dataLayer
   observador();
+  depois.splice(0).forEach(fn => fn()); // a conferida de 350 ms: com o vídeo já no lugar, não rola de novo
   return JSON.parse(JSON.stringify(rolou)); // objetos do vm vêm de outro realm
 }
 
@@ -220,4 +227,17 @@ test('pré-trava: mesmas exceções do componente (âncora, ?semtrava=1, robô, 
 
 test('sem JS a página é a de sempre: o <html> não nasce com a classe', () => {
   assert.doesNotMatch(html.match(/<html[^>]*>/)[0], /vsl-trava/);
+});
+
+test('a rolagem desconta o cabeçalho fixo; vídeo mais alto que o espaço encosta no cabeçalho', () => {
+  // 1366×768 com o menu de 72 px: centraliza no espaço abaixo dele.
+  assert.deepEqual(rolagem({ menu: 72 }), [{ top: 514 - 72 - (768 - 72 - 362) / 2, behavior: 'instant' }]);
+  // celular deitado (844×390): 362 px de vídeo não cabem nos 318 px livres; o topo fica logo abaixo do menu.
+  assert.deepEqual(rolagem({ menu: 72, topo: 514, altura: 362, tela: 390 }), [{ top: 514 - 72, behavior: 'instant' }]);
+  // a faixa dourada some com a rolagem (cabeçalho 102 -> 72 px, conteúdo sobe 38 px): a conferida
+  // de 350 ms leva o topo do vídeo de volta ao pé do menu.
+  assert.deepEqual(rolagem({ menu: 102, menuDepois: 72, recuo: 38, topo: 514, altura: 362, tela: 390 }),
+    [{ top: 514 - 102, behavior: 'instant' }, { top: 514 - 102 + (514 - 412 - 38) - 72, behavior: 'instant' }]);
+  // já inteiro e abaixo do menu: não mexe.
+  assert.deepEqual(rolagem({ menu: 64, topo: 375, altura: 197, tela: 844 }), []);
 });

@@ -341,8 +341,15 @@ html.vsl-trava #hero .hero-title{position:absolute;width:1px;height:1px;padding:
 html.vsl-trava body{padding-top:0 !important;}
 html.vsl-trava #hero{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center;}
 html.vsl-trava #hero > .hero-vsl-inner{width:100%;padding-top:24px;padding-bottom:24px;}
-/* travada, o aviso precisa caber junto do vídeo na 1ª tela do computador */
-html.vsl-trava #hero .vsl-frame{max-width:min(960px,calc((100vh - 200px) * 16 / 9));}
+/* travada, o aviso precisa caber junto do vídeo na 1ª tela do computador (svh: a altura sem a barra do navegador) */
+html.vsl-trava #hero .vsl-frame{max-width:min(960px,calc((100vh - 200px) * 16 / 9));max-width:min(960px,calc((100svh - 200px) * 16 / 9));}
+/* tela baixa (celular deitado): sem o selo e com menos respiro, o vídeo passa de 338×190 para ~533×300 em 844×390 */
+@media (max-height:500px){
+  html.vsl-trava #hero .hero-badge{display:none;}
+  html.vsl-trava #hero > .hero-vsl-inner{padding-top:12px;padding-bottom:12px;}
+  html.vsl-trava #hero .vsl-frame{max-width:min(960px,calc((100vh - 90px) * 16 / 9));max-width:min(960px,calc((100svh - 90px) * 16 / 9));}
+  html.vsl-trava .vsl-trava-aviso{margin-top:8px;}
+}
 .vsl-trava-aviso{width:100%;max-width:460px;margin:16px auto 0;text-align:center;}
 .vsl-trava-aviso[hidden]{display:none;}
 /* na pré-trava (antes do componente mostrar o aviso), o aviso invisível já segura o espaço */
@@ -2693,13 +2700,30 @@ if(hamBtn&&mobMenu){
    Quem libera assistindo está no pitch, e o hero volta ao normal: menu, título e texto reaparecem
    acima do vídeo, que desce. Num notebook de 1366×768 a base do vídeo (legenda e controles) saía
    da tela bem na hora do preço. Aqui a página rola só o necessário para o vídeo caber de novo,
-   centralizado. Não mexe quando a trava abriu por falha do player (motivo diferente de
-   "assistiu") nem quando o vídeo já cabe. Nasce com a classe já posta pela pré-trava do <head> e
-   vê a trava sair; a pré-trava desistindo não rola (não há vsl_pagina_liberada). */
+   centralizado no espaço abaixo do cabeçalho fixo (menu e faixa dourada). Se nem assim couber
+   (celular deitado), o topo do vídeo encosta no cabeçalho. Não mexe quando a trava abriu por
+   falha do player (motivo diferente de "assistiu") nem quando o vídeo já cabe. Nasce com a classe
+   já posta pela pré-trava do <head> e vê a trava sair; a pré-trava desistindo não rola (não há
+   vsl_pagina_liberada). */
 (function () {
   var raiz = document.documentElement, frame = document.getElementById('heroVslFrame');
   if (!frame || !window.MutationObserver) return;
   var travada = raiz.classList.contains('vsl-trava'); // a pré-trava do <head> já pôs a classe
+  function cabecalho() { // fundo do que é fixo no topo e está à vista
+    var fundo = 0, ids = ['topbar', 'mainNav'];
+    for (var i = 0; i < ids.length; i++) {
+      var el = document.getElementById(ids[i]);
+      if (el && el.getClientRects().length) fundo = Math.max(fundo, el.getBoundingClientRect().bottom);
+    }
+    return fundo;
+  }
+  function encaixa() {
+    var cab = cabecalho(), alto = window.innerHeight, r = frame.getBoundingClientRect();
+    var topo = cab + Math.max(0, (alto - cab - r.height) / 2); // onde o topo do vídeo deve ficar
+    if ((r.top >= cab && r.bottom <= alto) || Math.abs(r.top - topo) < 1) return false; // já inteiro, ou alto demais e já no lugar
+    try { window.scrollTo({top: window.pageYOffset + r.top - topo, behavior: 'instant'}); } catch (e) {}
+    return true;
+  }
   new window.MutationObserver(function () {
     if (raiz.classList.contains('vsl-trava')) { travada = true; return; }
     if (!travada) return;
@@ -2707,9 +2731,9 @@ if(hamBtn&&mobMenu){
     var dl = window.dataLayer || [], ev = null;
     for (var i = dl.length - 1; i >= 0 && !ev; i--) if (dl[i] && dl[i].event === 'vsl_pagina_liberada') ev = dl[i];
     if (!ev || ev.motivo !== 'assistiu') return;
-    var r = frame.getBoundingClientRect(), alto = window.innerHeight;
-    if (r.top >= 0 && r.bottom <= alto) return;
-    try { window.scrollTo({top: window.pageYOffset + r.top - Math.max(0, (alto - r.height) / 2), behavior: 'instant'}); } catch (e) {}
+    // a rolagem esconde a faixa dourada, sobe o menu (transição de 0,3 s) e muda o recuo do corpo
+    // (script de scroll da página): confere de novo quando o menu assenta e acerta o que sobrou
+    if (encaixa()) window.setTimeout(encaixa, 350);
   }).observe(raiz, {attributes: true, attributeFilter: ['class']});
 })();
 </script>
