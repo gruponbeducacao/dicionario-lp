@@ -55,8 +55,29 @@ test('o player continua com o src cru do Panda, sem os parâmetros que entraram 
     'o src do player ganhou parâmetros (autoplay, muted, controls...): reveja o revert de 20/09 antes');
 });
 
-test('travada, o atalho da pausa para a oferta sai de cena', () => {
+test('travada, o atalho da pausa e o botão do fim para a oferta saem de cena', () => {
   assert.match(css, /html\.vsl-trava \.vsl-ov-link\s*\{[^}]*display:\s*none/);
+  // Pausado no último segundo, o overlay vai para "fim" com a página ainda travada.
+  assert.match(css, /html\.vsl-trava \.vsl-ov-cta\s*\{[^}]*display:\s*none/);
+});
+
+test('a faixa de baixo é do Panda: nada de texto depois do play, e o fundo some antes dela', () => {
+  // No celular a barra de progresso do Panda começa a 68 px da base do vídeo. Texto do overlay
+  // ali (o "3 min · com legendas" de antes) é tocado por quem quer dar play e pula o vídeo.
+  for (const [estado, prox] of [['vsl-ov-inicio', 'vsl-ov-pausa'], ['vsl-ov-pausa', 'vsl-ov-fim']]) {
+    const bloco = blocoOv.slice(blocoOv.indexOf(`class="${estado}"`), blocoOv.indexOf(`class="${prox}"`));
+    const depoisDoPlay = bloco.slice(bloco.indexOf('</span>', bloco.indexOf('vsl-ov-play')) + 7);
+    assert.match(depoisDoPlay, /^\s*<\/div>\s*<div\s*$/, `.${estado}: há conteúdo depois do play`);
+  }
+  // O que só cabe em vídeo alto fica escondido por padrão e só volta por container query.
+  assert.match(regra('.vsl-ov-titulo,.vsl-ov-pausa .vsl-ov-sub,.vsl-ov-fim .vsl-ov-baixo'), /display:\s*none/);
+  assert.match(css, /--vsl-faixa:\s*\d+px/);
+  for (const seletor of ['.vsl-ov', '.vsl-ov[data-estado="inicio"],.vsl-ov[data-estado="fim"]']) {
+    assert.match(regra(seletor), /rgba\(14,22,38,0\) calc\(100% - var\(--vsl-faixa\)\)\)/,
+      `${seletor}: o fundo escurece a faixa de controles do Panda`);
+  }
+  // Com 1fr puro, texto demais em cima empurraria o play para fora do botão do Panda.
+  assert.match(regra('.vsl-ov > div'), /grid-template-rows:\s*minmax\(0,\s*1fr\)\s+auto\s+minmax\(0,\s*1fr\)/);
 });
 
 test('a página carrega o overlay do site principal, com cache-buster e defer', () => {

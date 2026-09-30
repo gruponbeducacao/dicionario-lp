@@ -317,14 +317,21 @@ html.vsl-trava #hero .vsl-frame{max-width:min(960px,calc((100vh - 200px) * 16 / 
    cai no play do próprio Panda, então o play acontece dentro do iframe e o som é liberado (no iPhone,
    um play mandado da página pode sair mudo). A grade 1fr/auto/1fr põe o play dourado no CENTRO EXATO
    do vídeo, em cima do botão do Panda. NÃO é o overlay revertido em 20/09 (PR #4): aquele cobria o
-   player com botão próprio e só saía quando o Panda confirmava um play mandado por postMessage. */
-.vsl-ov{position:absolute;inset:0;z-index:3;text-align:center;color:var(--branco);pointer-events:none;
-  background:linear-gradient(180deg,rgba(14,22,38,.46) 0%,rgba(14,22,38,.72) 52%,rgba(14,22,38,.34) 84%,rgba(14,22,38,0) 100%);}
+   player com botão próprio e só saía quando o Panda confirmava um play mandado por postMessage.
+   A FAIXA DE BAIXO É DO PANDA (revisão de 30/09/2026): a barra de progresso começa a 68 px da base do
+   vídeo nos players pequenos e a 77 px nos grandes, com os botões embaixo dela. O overlay não põe
+   texto ali nem a escurece: no celular o "3 min · com legendas" caía em cima da barra, e o toque
+   nele pulava o vídeo para 1:40 sem dar play. Por isso os textos do início e da pausa ficam ACIMA
+   do play (na assinatura ficam abaixo), o que só cabe em vídeo alto aparece por container query
+   (sem suporte, fica escondido) e o fundo some antes da faixa (--vsl-faixa). */
+.vsl-ov{--vsl-faixa:80px;container:vslov / size;position:absolute;inset:0;z-index:3;text-align:center;color:var(--branco);pointer-events:none;
+  background:linear-gradient(180deg,rgba(14,22,38,.46) 0%,rgba(14,22,38,.72) 50%,rgba(14,22,38,.4) calc(100% - var(--vsl-faixa) - 24px),rgba(14,22,38,0) calc(100% - var(--vsl-faixa)));}
 .vsl-ov[hidden]{display:none;}
-/* início e fim: fundo escurecido por igual; na pausa a base fica clara e a barra do player aparece */
-.vsl-ov[data-estado="inicio"],.vsl-ov[data-estado="fim"]{background:radial-gradient(ellipse at center,rgba(14,22,38,.58) 0%,rgba(14,22,38,.84) 78%);}
-.vsl-ov > div{display:none;position:absolute;inset:0;grid-template-rows:1fr auto 1fr;justify-items:center;padding:12px 18px;}
-.vsl-ov-cima{align-self:end;padding-bottom:clamp(8px,1.6vw,16px);}
+/* início e fim: escurecido por igual até a faixa do player, que fica limpa */
+.vsl-ov[data-estado="inicio"],.vsl-ov[data-estado="fim"]{background:linear-gradient(180deg,rgba(14,22,38,.84) 0%,rgba(14,22,38,.66) 45%,rgba(14,22,38,.6) calc(100% - var(--vsl-faixa) - 24px),rgba(14,22,38,0) calc(100% - var(--vsl-faixa)));}
+/* minmax(0,1fr): texto demais na linha de cima não empurra o play para fora do centro */
+.vsl-ov > div{display:none;position:absolute;inset:0;grid-template-rows:minmax(0,1fr) auto minmax(0,1fr);justify-items:center;padding:12px 18px;}
+.vsl-ov-cima{align-self:end;display:flex;flex-direction:column;align-items:center;gap:clamp(3px,.8vw,10px);max-width:640px;padding-bottom:clamp(6px,1.6vw,16px);}
 .vsl-ov-baixo{align-self:start;padding-top:clamp(8px,1.6vw,16px);display:flex;flex-direction:column;align-items:center;gap:clamp(4px,1vw,10px);max-width:640px;}
 .vsl-ov[data-estado="inicio"] .vsl-ov-inicio,.vsl-ov[data-estado="pausa"] .vsl-ov-pausa,.vsl-ov[data-estado="fim"] .vsl-ov-fim{display:grid;}
 .vsl-ov-kicker{font:800 clamp(10px,1.45vw,13px)/1.25 'Montserrat',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--dourado);text-shadow:0 1px 8px rgba(0,0,0,.55);}
@@ -343,11 +350,23 @@ html.vsl-trava #hero .vsl-frame{max-width:min(960px,calc((100vh - 200px) * 16 / 
 .vsl-ov-cta{display:inline-block;background:#C0392B;color:#fff;font:800 16px/1.2 'Montserrat',sans-serif;padding:18px 44px;border-radius:8px;text-decoration:none;
   box-shadow:0 10px 26px rgba(0,0,0,.45);transition:background .25s ease,transform .25s ease;}
 .vsl-ov-cta:hover,.vsl-ov-cta:focus-visible{background:#A93226;color:#fff;transform:translateY(-2px);}
+/* só em vídeo alto: o título do início, o "clique para continuar" da pausa e o "assistir de novo" do fim
+   (este abaixo do botão, mas longe da faixa do player). Sem container query, ficam de fora. */
+.vsl-ov-titulo,.vsl-ov-pausa .vsl-ov-sub,.vsl-ov-fim .vsl-ov-baixo{display:none;}
+@container vslov (min-height: 440px){.vsl-ov-inicio .vsl-ov-titulo{display:block;}}
+@container vslov (min-height: 260px){.vsl-ov-pausa .vsl-ov-sub{display:block;}}
+@container vslov (min-height: 320px){.vsl-ov-fim .vsl-ov-baixo{display:flex;}}
+/* vídeo estreito com tela larga (celular deitado): a letra segue o tamanho do vídeo, não o da tela */
+@container vslov (max-width: 480px){.vsl-ov-desk{display:none;}.vsl-ov-kicker{font-size:9.5px;letter-spacing:.06em;}
+  .vsl-ov-sub,.vsl-ov-link{font-size:11px;}.vsl-ov-cta{padding:10px 18px;font-size:13px;}}
 @media (max-width:560px){.vsl-ov > div{padding:8px 12px;}.vsl-ov-titulo,.vsl-ov-desk{display:none;}
-  .vsl-ov-kicker{font-size:9.5px;letter-spacing:.06em;}.vsl-ov-cta{padding:10px 18px;font-size:13px;}}
+  .vsl-ov-kicker{font-size:9.5px;letter-spacing:.06em;}.vsl-ov-cta{padding:10px 18px;font-size:13px;}
+  .vsl-ov.vsl-ov-oferta .vsl-ov-link{padding:6px 14px;}}
 @media (prefers-reduced-motion: reduce){.vsl-ov-play::after{animation:none;opacity:0;}}
 /* travada, o atalho da pausa para a oferta sai (a oferta está escondida), como na assinatura */
 html.vsl-trava .vsl-ov-link{display:none !important;}
+/* e o botão do fim também: com a pausa no último segundo, o overlay vai para "fim" com a página ainda travada */
+html.vsl-trava .vsl-ov-cta{display:none !important;}
 .cta-dramatic{
   background:
     radial-gradient(ellipse 90% 70% at 50% 120%, rgba(200,168,75,0.18) 0%, transparent 60%),
@@ -578,26 +597,28 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
       <script src="https://player.pandavideo.com.br/embed.js"></script>
       <!-- overlay de play/pausa: o mesmo da assinatura.html (assets/vsl-overlay.js do site). Só visual
            (pointer-events: none): o clique atravessa e cai no player. O script troca o estado pelos
-           avisos do player (some no play, volta na pausa e no fim); sem JS, fica hidden. -->
+           avisos do player (some no play, volta na pausa e no fim); sem JS, fica hidden.
+           No início e na pausa, NADA vem depois do play: a faixa de baixo é da barra do Panda.
+           TEXTOS DO OVERLAY = RASCUNHO (30/09/2026), para revisão do Vinícius antes do merge. -->
       <div class="vsl-ov" id="heroVslOverlay" data-estado="inicio" hidden>
         <div class="vsl-ov-inicio">
-          <p class="vsl-ov-kicker vsl-ov-cima">Assista antes de conhecer a oferta</p>
-          <span class="vsl-ov-play" aria-hidden="true"></span>
-          <div class="vsl-ov-baixo">
+          <div class="vsl-ov-cima">
+            <p class="vsl-ov-kicker">Assista antes de conhecer a oferta</p>
             <p class="vsl-ov-titulo">Por que você trava numa palavra, e não no cálculo</p>
             <p class="vsl-ov-sub">3 min · com legendas<span class="vsl-ov-desk"> · clique para assistir com som</span></p>
           </div>
+          <span class="vsl-ov-play" aria-hidden="true"></span>
         </div>
         <div class="vsl-ov-pausa">
-          <p class="vsl-ov-kicker vsl-ov-cima">Você parou em <span data-vsl-ov-tempo>0:00</span></p>
-          <span class="vsl-ov-play" aria-hidden="true"></span>
-          <div class="vsl-ov-baixo">
+          <div class="vsl-ov-cima">
+            <p class="vsl-ov-kicker">Você parou em <span data-vsl-ov-tempo>0:00</span></p>
             <p class="vsl-ov-sub">Clique para continuar de onde parou</p>
             <a href="#cta-final" class="vsl-ov-link" data-fc-vsl-cta>ou vá direto para a oferta</a>
           </div>
+          <span class="vsl-ov-play" aria-hidden="true"></span>
         </div>
         <div class="vsl-ov-fim">
-          <p class="vsl-ov-kicker vsl-ov-cima">Agora é com você</p>
+          <div class="vsl-ov-cima"><p class="vsl-ov-kicker">Agora é com você</p></div>
           <a href="#cta-final" class="vsl-ov-cta" data-fc-vsl-cta>Quero o Dicionário</a>
           <div class="vsl-ov-baixo"><p class="vsl-ov-sub">ou clique no vídeo para assistir de novo</p></div>
         </div>
