@@ -2625,6 +2625,31 @@ if(hamBtn&&mobMenu){
 <!-- Trava da página no vídeo. Mesmo arquivo e mesma versão (?v=) da assinatura.html: ao mudar o
      vsl-trava.js no site, subir o ?v= lá E aqui, senão esta página segue com a cópia em cache. -->
 <script src="https://fluenciacontabil.com.br/assets/vsl-trava.js?v=20260930e" defer></script>
+<script>
+/* Trava liberada no meio do vídeo: o vídeo continua inteiro na tela.
+   Quem libera assistindo está no pitch, e o hero volta ao normal: menu, título e texto reaparecem
+   acima do vídeo, que desce. Num notebook de 1366×768 a base do vídeo (legenda e controles) saía
+   da tela bem na hora do preço. Aqui a página rola só o necessário para o vídeo caber de novo,
+   centralizado. Não mexe quando a trava abriu por falha do player (motivo diferente de
+   "assistiu") nem quando o vídeo já cabe. Roda antes do vsl-trava.js (defer), então vê a trava
+   entrar e sair. */
+(function () {
+  var raiz = document.documentElement, frame = document.getElementById('heroVslFrame');
+  if (!frame || !window.MutationObserver) return;
+  var travada = false;
+  new window.MutationObserver(function () {
+    if (raiz.classList.contains('vsl-trava')) { travada = true; return; }
+    if (!travada) return;
+    travada = false;
+    var dl = window.dataLayer || [], ev = null;
+    for (var i = dl.length - 1; i >= 0 && !ev; i--) if (dl[i] && dl[i].event === 'vsl_pagina_liberada') ev = dl[i];
+    if (!ev || ev.motivo !== 'assistiu') return;
+    var r = frame.getBoundingClientRect(), alto = window.innerHeight;
+    if (r.top >= 0 && r.bottom <= alto) return;
+    try { window.scrollTo({top: window.pageYOffset + r.top - Math.max(0, (alto - r.height) / 2), behavior: 'instant'}); } catch (e) {}
+  }).observe(raiz, {attributes: true, attributeFilter: ['class']});
+})();
+</script>
 
 <script>
 /* Demo interativa da plataforma — portada de assinatura.html. */

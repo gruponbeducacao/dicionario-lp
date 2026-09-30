@@ -16,6 +16,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import vm from 'node:vm';
 
 const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
 
@@ -103,4 +104,40 @@ test('o hero não tem preço nem checkout: travada, nada de oferta fica à vista
   for (const seletor of ['#hero a.vsl-cta', '#hero .hero-trust', '#hero .hero-vsl-sub']) {
     assert.ok(escondeNaTrava(seletor), `o CSS não esconde ${seletor} na trava`);
   }
+});
+
+// O script inline que segura o vídeo na tela quando a trava libera.
+function rolagem({ motivo = 'assistiu', topo = 514, altura = 362, tela = 768 } = {}) {
+  const fonte = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m => m[1])
+    .find(s => s.includes('vsl_pagina_liberada'));
+  assert.ok(fonte, 'faltou o script que segura o vídeo na tela ao liberar');
+  const classes = new Set();
+  let observador = null;
+  const rolou = [];
+  const window = {
+    innerHeight: tela, pageYOffset: 0, dataLayer: [],
+    MutationObserver: class { constructor(fn) { observador = fn; } observe() {} },
+    scrollTo: o => rolou.push(o),
+  };
+  const document = {
+    documentElement: { classList: { contains: c => classes.has(c) } },
+    getElementById: () => ({ getBoundingClientRect: () => ({ top: topo, bottom: topo + altura, height: altura }) }),
+  };
+  vm.runInContext(fonte, vm.createContext({ window, document, Math }));
+  classes.add('vsl-trava'); observador();                       // a trava entra
+  classes.delete('vsl-trava');                                   // libera() tira a classe...
+  window.dataLayer.push({ event: 'vsl_pagina_liberada', motivo }); // ...e avisa o dataLayer
+  observador();
+  return JSON.parse(JSON.stringify(rolou)); // objetos do vm vêm de outro realm
+}
+
+test('liberou assistindo e o vídeo saiu da tela: a página rola até ele caber, centralizado', () => {
+  // 1366×768: o vídeo passa de y=130 (travado) para y=514 com 362 px de altura, e a base sai da tela.
+  assert.deepEqual(rolagem(), [{ top: 514 - (768 - 362) / 2, behavior: 'instant' }]);
+});
+
+test('não rola quando o vídeo já cabe nem quando a trava abriu por falha do player', () => {
+  assert.deepEqual(rolagem({ topo: 375, altura: 197, tela: 844 }), []); // celular: continua inteiro
+  assert.deepEqual(rolagem({ motivo: 'player_mudo' }), []);
+  assert.deepEqual(rolagem({ motivo: 'erro_player' }), []);
 });
