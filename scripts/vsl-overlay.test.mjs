@@ -43,6 +43,16 @@ test('o overlay é só visual: o clique atravessa e cai no player do Panda', () 
   // Só os links para a oferta recebem clique. Botão próprio sobre o player é o
   // desenho de 19/09, que parou o play.
   assert.ok(!/<button\b/.test(blocoOv), 'botão dentro do overlay');
+  // Nenhuma outra peça do overlay pode voltar a receber clique: `.vsl-ov-play{pointer-events:auto}`
+  // repete 19/09 (o toque para no overlay e não chega ao player). Só os dois links para a oferta.
+  assert.ok(!/pointer-events/i.test(blocoOv), 'pointer-events em style inline no overlay');
+  for (const [, seletores, corpo] of css.replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const valor = (corpo.match(/pointer-events\s*:\s*([^;}]+)/i) || [])[1];
+    if (!valor || !/vsl-ov/.test(seletores) || valor.trim() === 'none') continue;
+    for (const sel of seletores.split(',').map(s => s.trim())) {
+      assert.match(sel, /\.vsl-ov-(link|cta)$/, `"${sel}" recebe clique (pointer-events: ${valor.trim()})`);
+    }
+  }
   for (const [a] of blocoOv.matchAll(/<a\b[^>]*>/g)) {
     assert.match(a, /href="#cta-final"/, `link do overlay fora da oferta: ${a}`);
     assert.match(a, /data-fc-vsl-cta/, `link do overlay sem data-fc-vsl-cta (o clique não seria medido): ${a}`);

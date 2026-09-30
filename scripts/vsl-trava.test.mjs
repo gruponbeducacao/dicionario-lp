@@ -112,18 +112,23 @@ function rolagem({ motivo = 'assistiu', topo = 514, altura = 362, tela = 768 } =
     .find(s => s.includes('vsl_pagina_liberada'));
   assert.ok(fonte, 'faltou o script que segura o vídeo na tela ao liberar');
   const classes = new Set();
-  let observador = null;
+  let observador = null, observado = null;
   const rolou = [];
+  const raiz = { classList: { contains: c => classes.has(c) } };
   const window = {
     innerHeight: tela, pageYOffset: 0, dataLayer: [],
-    MutationObserver: class { constructor(fn) { observador = fn; } observe() {} },
+    MutationObserver: class { constructor(fn) { observador = fn; } observe(alvo, opcoes) { observado = { alvo, opcoes }; } },
     scrollTo: o => rolou.push(o),
   };
-  const document = {
-    documentElement: { classList: { contains: c => classes.has(c) } },
-    getElementById: () => ({ getBoundingClientRect: () => ({ top: topo, bottom: topo + altura, height: altura }) }),
-  };
+  // Só o iframe do vídeo tem retângulo: o slot (#heroVsl) mede outra coisa.
+  const frame = { getBoundingClientRect: () => ({ top: topo, bottom: topo + altura, height: altura }) };
+  const document = { documentElement: raiz, getElementById: id => (id === 'heroVslFrame' ? frame : null) };
   vm.runInContext(fonte, vm.createContext({ window, document, Math }));
+  // O observer tem de olhar a classe do <html>: com outro alvo ou outro atributo, nunca dispara no navegador.
+  assert.ok(observador && observado, 'o script não instalou o observer (achou o #heroVslFrame?)');
+  assert.equal(observado.alvo, raiz, 'o observer não observa o <html>');
+  assert.ok(observado.opcoes.attributes !== false && [...(observado.opcoes.attributeFilter || [])].includes('class'),
+    'o observer não observa o atributo class');
   classes.add('vsl-trava'); observador();                       // a trava entra
   classes.delete('vsl-trava');                                   // libera() tira a classe...
   window.dataLayer.push({ event: 'vsl_pagina_liberada', motivo }); // ...e avisa o dataLayer
