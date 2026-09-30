@@ -364,7 +364,7 @@ html.vsl-trava .vsl-trava-aviso[hidden]{display:block;}
 /* ── OVERLAY DE PLAY/PAUSA DA VSL (30/09/2026) — https://fluenciacontabil.com.br/assets/vsl-overlay.js ──
    O mesmo da assinatura.html (PR #94 do site). Só visual: pointer-events:none, o clique atravessa e
    cai no play do próprio Panda, então o play acontece dentro do iframe e o som é liberado (no iPhone,
-   um play mandado da página pode sair mudo). A grade 1fr/auto/1fr põe o play dourado no CENTRO EXATO
+   um play mandado da página pode sair mudo). A grade minmax(0,1fr)/auto/minmax(0,1fr) põe o play dourado no CENTRO EXATO
    do vídeo, em cima do botão do Panda. NÃO é o overlay revertido em 20/09 (PR #4): aquele cobria o
    player com botão próprio e só saía quando o Panda confirmava um play mandado por postMessage.
    A FAIXA DE BAIXO É DO PANDA (revisão de 30/09/2026): a barra de progresso começa a 68 px da base do
@@ -621,9 +621,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
        200,2 s) e o pitch do Bloco 7 do roteiro, "Preço, garantia e o que não volta", que na
        1,25x começa em 2:46 = 166 s (era 3:27 = 207 s na versão 1x, de 250,2 s).
        Trava (assets/vsl-trava.js, também do site principal, o mesmo da assinatura.html):
-       data-vsl-trava = segundos de vídeo REALMENTE assistidos até liberar a página. 166 s = o
-       pitch (decisão do Vinícius, 30/09/2026): a oferta só aparece para quem assistiu até a
-       apresentação do Dicionário.
+       data-vsl-trava = segundos de vídeo que o componente conta como assistidos até liberar a
+       página. 166 s = o pitch (decisão do Vinícius, 30/09/2026): a oferta é para quem assistiu até a
+       apresentação do Dicionário. A contagem é do componente e tem limites (ex.: o fim do vídeo
+       libera; pular trechos e o comportamento com o player travado dependem da versão do
+       vsl-trava.js): não prometer aqui mais do que ele garante.
        Trocar de vídeo = trocar juntos o id do ?v=, data-vsl-version, data-vsl-duration,
        data-vsl-pitch, data-vsl-trava e o texto de #vslTrava. -->
   <div class="hero-vsl-inner" id="heroVsl"
@@ -676,8 +678,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <!-- trava da página no vídeo (assets/vsl-trava.js do site): mesmo markup e CSS da assinatura.html.
          O aviso fica no layout o tempo todo (reserva o espaço, o vídeo não pula) e só aparece na
-         pausa ([data-pausa]). Sem JS, com #âncora na URL, ?semtrava=1, robô de busca, quem já
-         liberou ou player mudo por 15 s: não trava. -->
+         pausa ([data-pausa]). Não trava sem JS, com #âncora na URL, com ?semtrava=1, para robô de
+         busca e para quem já liberou. Se o player falhar, é o componente que decide se e quando
+         abre sozinho (ver assets/vsl-trava.js no site); esta página não garante prazo. -->
     <div class="vsl-trava-aviso" id="vslTrava" aria-live="polite" hidden>
       <p class="vsl-trava-txt" data-vsl-trava-txt>Assista mais 2:46 para liberar a página</p>
       <div class="vsl-trava-barra" aria-hidden="true"><span data-vsl-trava-barra></span></div>
