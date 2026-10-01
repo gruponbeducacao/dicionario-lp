@@ -6,10 +6,15 @@
 <!-- Pré-trava (30/09/2026). O vsl-trava.js vem de outro domínio, com defer: até ele rodar, a página
      inteira aparecia e depois sumia. Aqui a classe vsl-trava entra no <html> já no parse, com as
      MESMAS exceções do componente (âncora na URL, ?semtrava=1, robô, quem já liberou, slot inválido).
-     Se o componente não assumir (script com erro ou 404, ou nada até 4 s depois do load, nunca além
-     de 15 s), a pré-trava desiste: tira a classe e marca FC_VSL_TRAVA = 'desistiu', e o componente,
-     se chegar depois, não tranca por cima (ele começa com "if (window.FC_VSL_TRAVA) return;").
-     Sem JS nada disto roda e a página é a de sempre. -->
+     Depois que o componente assume (window.FC_VSL_TRAVA = true), a pré-trava não faz mais nada: a
+     trava é dele, e ele só abre a página com sinal de falha do player (player_mudo, erro_player,
+     player_travado) ou com o vídeo assistido/terminado — nunca por tempo para quem tem o player
+     funcionando e ainda não deu o play (vsl-trava.js ?v=20260930f, PR #111 do site).
+     O prazo daqui vale só para o COMPONENTE que não chega: script com erro ou 404 (na hora), ou
+     nada até 4 s depois do load (com defer, ele roda antes do DOMContentLoaded, então esse prazo
+     nunca corre antes dele), nunca além de 15 s. Aí a pré-trava desiste: tira a classe e marca
+     FC_VSL_TRAVA = 'desistiu', e o componente, se chegar depois, não tranca por cima (ele começa com
+     "if (window.FC_VSL_TRAVA) return;"). Sem JS nada disto roda e a página é a de sempre. -->
 <script>
 (function () {
   var VERSAO = 'dicionario-125x-20260930'; // igual ao data-vsl-version do #heroVsl (o teste confere)
@@ -41,6 +46,22 @@
   });
   w.addEventListener('load', function () { setTimeout(desiste, 4000); });
   setTimeout(desiste, 15000);
+})();
+</script>
+<!-- Ouvinte do player (PR #111 do site): marca window.FC_VSL_PLAYER_OK na 1ª mensagem do Panda.
+     Tem de vir ANTES do iframe do vídeo (#heroVslFrame): o vsl-trava.js (defer, de outro domínio) pode
+     começar a ouvir depois do panda_ready, e sem este sinal abria a página aos ~16 s com o player
+     funcionando. Texto idêntico ao da assinatura.html; o teste confere. -->
+<script data-vsl-trava-ouvinte>
+(function () {
+  function ouve(e) {
+    var f = document.getElementById('heroVslFrame'), d = e.data;
+    if (!f || e.source !== f.contentWindow || !/^https:\/\/player-[a-z0-9-]+\.tv\.pandavideo\.com\.br$/.test(e.origin) ||
+        !d || typeof d !== 'object' || typeof d.message !== 'string') return;
+    window.FC_VSL_PLAYER_OK = true;
+    window.removeEventListener('message', ouve);
+  }
+  window.addEventListener('message', ouve);
 })();
 </script>
 <!-- Google Tag Manager -->
@@ -624,8 +645,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
        data-vsl-trava = segundos de vídeo que o componente conta como assistidos até liberar a
        página. 166 s = o pitch (decisão do Vinícius, 30/09/2026): a oferta é para quem assistiu até a
        apresentação do Dicionário. A contagem é do componente e tem limites (ex.: o fim do vídeo
-       libera; pular trechos e o comportamento com o player travado dependem da versão do
-       vsl-trava.js): não prometer aqui mais do que ele garante.
+       libera, com motivo fim_do_video se o limite não foi assistido): não prometer aqui mais do
+       que o vsl-trava.js garante.
        Trocar de vídeo = trocar juntos o id do ?v=, data-vsl-version, data-vsl-duration,
        data-vsl-pitch, data-vsl-trava e o texto de #vslTrava. -->
   <div class="hero-vsl-inner" id="heroVsl"
@@ -679,8 +700,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- trava da página no vídeo (assets/vsl-trava.js do site): mesmo markup e CSS da assinatura.html.
          O aviso fica no layout o tempo todo (reserva o espaço, o vídeo não pula) e só aparece na
          pausa ([data-pausa]). Não trava sem JS, com #âncora na URL, com ?semtrava=1, para robô de
-         busca e para quem já liberou. Se o player falhar, é o componente que decide se e quando
-         abre sozinho (ver assets/vsl-trava.js no site); esta página não garante prazo. -->
+         busca e para quem já liberou. Abrir sozinha é decisão do componente e só acontece com
+         sinal de falha do player (ver assets/vsl-trava.js no site); esta página não garante prazo. -->
     <div class="vsl-trava-aviso" id="vslTrava" aria-live="polite" hidden>
       <p class="vsl-trava-txt" data-vsl-trava-txt>Assista mais 2:46 para liberar a página</p>
       <div class="vsl-trava-barra" aria-hidden="true"><span data-vsl-trava-barra></span></div>
@@ -2696,8 +2717,12 @@ if(hamBtn&&mobMenu){
 <!-- Overlay de play/pausa da VSL: mesmo arquivo e mesma versão (?v=) da assinatura.html. -->
 <script src="https://fluenciacontabil.com.br/assets/vsl-overlay.js?v=20260929" defer></script>
 <!-- Trava da página no vídeo. Mesmo arquivo e mesma versão (?v=) da assinatura.html: ao mudar o
-     vsl-trava.js no site, subir o ?v= lá E aqui, senão esta página segue com a cópia em cache. -->
-<script src="https://fluenciacontabil.com.br/assets/vsl-trava.js?v=20260930e" defer></script>
+     vsl-trava.js no site, subir o ?v= lá E aqui, senão esta página segue com a cópia em cache.
+     ORDEM DE PUBLICAÇÃO: o ?v= é só chave de cache, o servidor entrega o arquivo que estiver no ar.
+     Esta página só vai para a main DEPOIS do PR #111 do site no ar (conferir o arquivo servido):
+     antes disso, ?v=20260930f traria o componente antigo e o cache guardaria a cópia velha nessa
+     chave por até 4 h. -->
+<script src="https://fluenciacontabil.com.br/assets/vsl-trava.js?v=20260930f" defer></script>
 <script>
 /* Trava liberada no meio do vídeo: o vídeo continua inteiro na tela.
    Quem libera assistindo está no pitch, e o hero volta ao normal: menu, título e texto reaparecem
@@ -2705,7 +2730,8 @@ if(hamBtn&&mobMenu){
    da tela bem na hora do preço. Aqui a página rola só o necessário para o vídeo caber de novo,
    centralizado no espaço abaixo do cabeçalho fixo (menu e faixa dourada). Se nem assim couber
    (celular deitado), o topo do vídeo encosta no cabeçalho. Não mexe quando a trava abriu por
-   falha do player (motivo diferente de "assistiu") nem quando o vídeo já cabe. Nasce com a classe
+   falha do player (player_mudo, erro_player, player_travado: só "assistiu" e "fim_do_video" rolam)
+   nem quando o vídeo já cabe. Nasce com a classe
    já posta pela pré-trava do <head> e vê a trava sair; a pré-trava desistindo não rola (não há
    vsl_pagina_liberada). */
 (function () {
@@ -2733,7 +2759,7 @@ if(hamBtn&&mobMenu){
     travada = false;
     var dl = window.dataLayer || [], ev = null;
     for (var i = dl.length - 1; i >= 0 && !ev; i--) if (dl[i] && dl[i].event === 'vsl_pagina_liberada') ev = dl[i];
-    if (!ev || ev.motivo !== 'assistiu') return;
+    if (!ev || (ev.motivo !== 'assistiu' && ev.motivo !== 'fim_do_video')) return;
     // a rolagem esconde a faixa dourada, sobe o menu (transição de 0,3 s) e muda o recuo do corpo
     // (script de scroll da página): confere de novo quando o menu assenta e acerta o que sobrou
     if (encaixa()) window.setTimeout(encaixa, 350);

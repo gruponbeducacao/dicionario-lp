@@ -75,12 +75,46 @@ test('o aviso tem o markup que o componente procura, nasce oculto e o texto sem 
   assert.match(css, /html\.vsl-trava \.vsl-trava-aviso\[hidden\]\s*\{[^}]*display:\s*block/);
 });
 
-test('a página carrega o componente do site principal, com cache-buster e defer', () => {
+test('a página carrega o componente do site principal na versão do PR #111, com defer', () => {
+  // 20260930f: só abre a página sozinha com sinal de falha do player e lê o FC_VSL_PLAYER_OK do
+  // trecho ouvinte. Uma versão anterior volta a abrir aos ~16 s para quem tem o player funcionando.
   assert.match(
     html,
-    /<script[^>]+src="https:\/\/fluenciacontabil\.com\.br\/assets\/vsl-trava\.js\?v=[0-9a-z]+"[^>]*\bdefer\b/,
-    'faltou o <script defer> do vsl-trava.js, com cache-buster',
+    /<script[^>]+src="https:\/\/fluenciacontabil\.com\.br\/assets\/vsl-trava\.js\?v=20260930f"[^>]*\bdefer\b/,
+    'faltou o <script defer> do vsl-trava.js?v=20260930f',
   );
+});
+
+// O trecho ouvinte do PR #111: marca FC_VSL_PLAYER_OK na 1ª mensagem do player, mesmo que o
+// vsl-trava.js (defer, de outro domínio) ainda não tenha começado a ouvir.
+const ouvinte = (html.match(/<script data-vsl-trava-ouvinte>([\s\S]*?)<\/script>/) || [])[1];
+
+test('o trecho ouvinte vem antes do iframe do vídeo', () => {
+  assert.ok(ouvinte, 'faltou o <script data-vsl-trava-ouvinte>');
+  const iframe = html.search(/<iframe[^>]*id="heroVslFrame"/);
+  assert.ok(iframe > 0 && html.indexOf('data-vsl-trava-ouvinte') < iframe,
+    'o ouvinte tem de vir antes do <iframe id="heroVslFrame">: depois dele, o panda_ready pode passar antes');
+});
+
+test('o trecho ouvinte só aceita mensagem do próprio player do Panda', () => {
+  const ORIGEM = 'https://player-vz-7867cfdb-be1.tv.pandavideo.com.br';
+  const roda = ({ origem = ORIGEM, doFrame = true, data = { message: 'panda_ready' } } = {}) => {
+    const ouvintes = {};
+    const frame = { contentWindow: {} };
+    const window = {
+      addEventListener: (n, fn) => { ouvintes[n] = fn; },
+      removeEventListener: (n, fn) => { if (ouvintes[n] === fn) delete ouvintes[n]; },
+    };
+    const document = { getElementById: id => (id === 'heroVslFrame' ? frame : null) };
+    vm.runInContext(ouvinte, vm.createContext({ window, document }));
+    ouvintes.message?.({ source: doFrame ? frame.contentWindow : {}, origin: origem, data });
+    return { ok: window.FC_VSL_PLAYER_OK === true, saiu: !ouvintes.message };
+  };
+  assert.deepEqual(roda(), { ok: true, saiu: true });
+  assert.equal(roda({ origem: 'https://evil.example' }).ok, false, 'aceitou outra origem');
+  assert.equal(roda({ origem: 'https://player-x.tv.pandavideo.com.br.evil.example' }).ok, false, 'aceitou origem parecida');
+  assert.equal(roda({ doFrame: false }).ok, false, 'aceitou mensagem de outra janela');
+  assert.equal(roda({ data: 'panda_ready' }).ok, false, 'aceitou mensagem sem objeto');
 });
 
 test('travada, a página é só o palco do vídeo: tudo fora do hero some, inclusive a oferta', () => {
@@ -154,6 +188,11 @@ test('não rola quando o vídeo já cabe nem quando a trava abriu por falha do p
   assert.deepEqual(rolagem({ topo: 375, altura: 197, tela: 844 }), []); // celular: continua inteiro
   assert.deepEqual(rolagem({ motivo: 'player_mudo' }), []);
   assert.deepEqual(rolagem({ motivo: 'erro_player' }), []);
+  assert.deepEqual(rolagem({ motivo: 'player_travado' }), []);
+});
+
+test('o fim do vídeo (fim_do_video, PR #111) também segura o vídeo na tela', () => {
+  assert.deepEqual(rolagem({ motivo: 'fim_do_video' }), [{ top: 514 - (768 - 362) / 2, behavior: 'instant' }]);
 });
 
 test('com a pré-trava do <head>, a classe já nasce no <html> e a rolagem continua valendo', () => {
@@ -188,6 +227,7 @@ function preTrava({ hash = '', search = '', ua = 'Mozilla/5.0 (iPhone)', liberad
     domPronto: () => docOuvintes.DOMContentLoaded?.(),
     carregou: () => ouvintes.load?.(),
     vencePrazos: () => prazos.splice(0).forEach(p => p.fn()),
+    prazos: () => prazos.map(p => p.ms),
     scriptFalhou: src => ouvintes.error?.({ target: { tagName: 'SCRIPT', src } }),
     componenteAssume: () => { window.FC_VSL_TRAVA = true; },
   };
@@ -199,6 +239,17 @@ test('pré-trava: trava já no parse e sai do caminho quando o componente assume
   r.domPronto(); r.componenteAssume(); r.carregou(); r.vencePrazos();
   assert.equal(r.travada(), true);
   assert.equal(r.window.FC_VSL_TRAVA, true);
+});
+
+test('pré-trava: prazo só para componente ausente, nunca mais curto que o do próprio componente', () => {
+  // O componente abre por player mudo aos 15 s de vida dele; a pré-trava não pode abrir antes disso,
+  // e o prazo depois do load (4 s) só corre se o componente, que roda antes do DOMContentLoaded, faltou.
+  const r = preTrava();
+  r.carregou();
+  const prazos = r.prazos();
+  assert.ok(prazos.length >= 2, 'faltou prazo da pré-trava');
+  assert.ok(Math.max(...prazos) >= 15000, 'teto absoluto da pré-trava abaixo de 15 s');
+  assert.ok(Math.min(...prazos) >= 4000, 'prazo depois do load abaixo de 4 s');
 });
 
 test('pré-trava: componente que não chega (lento demais, 404 ou erro) não deixa a página trancada', () => {
