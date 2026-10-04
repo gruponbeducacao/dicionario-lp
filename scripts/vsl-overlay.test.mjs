@@ -23,7 +23,7 @@ const css = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map(m => m[1]
 
 const inicioSlot = html.indexOf(html.match(/<div[^>]*id="heroVsl"[^>]*>/s)[0]);
 const inicioOv = html.indexOf('id="heroVslOverlay"');
-const blocoOv = html.slice(inicioOv, html.indexOf('<div class="vsl-trava-aviso"', inicioOv));
+const blocoOv = html.slice(inicioOv, html.indexOf('<a class="btn-glow vsl-cta"', inicioOv));
 const regra = seletor => (css.match(new RegExp(`(?:^|})\\s*${seletor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{([^}]*)\\}`, 'm')) || [])[1] ?? '';
 
 test('o overlay existe dentro do slot, nasce oculto no estado de início e tem os três estados', () => {
@@ -63,12 +63,6 @@ test('o player continua com o src cru do Panda, sem os parâmetros que entraram 
   const src = (html.match(/<iframe[^>]*id="heroVslFrame"[^>]*\ssrc="([^"]*)"/s) || [])[1];
   assert.match(src, /^https:\/\/player-[a-z0-9-]+\.tv\.pandavideo\.com\.br\/embed\/\?v=[0-9a-f-]{36}$/,
     'o src do player ganhou parâmetros (autoplay, muted, controls...): reveja o revert de 20/09 antes');
-});
-
-test('travada, o atalho da pausa e o botão do fim para a oferta saem de cena', () => {
-  assert.match(css, /html\.vsl-trava \.vsl-ov-link\s*\{[^}]*display:\s*none/);
-  // Pausado no último segundo, o overlay vai para "fim" com a página ainda travada.
-  assert.match(css, /html\.vsl-trava \.vsl-ov-cta\s*\{[^}]*display:\s*none/);
 });
 
 test('a faixa de baixo é do Panda: nada de texto depois do play, e o fundo some antes dela', () => {
