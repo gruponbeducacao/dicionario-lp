@@ -69,6 +69,15 @@ test('a página carrega o receptor do site principal', () => {
   );
 });
 
+test('a página não trava no vídeo: a oferta fica à vista de quem não deu play', () => {
+  // 03/10/2026, decisão do Vinícius. A trava de 01/10 (página só com o vídeo até o pitch) ficou
+  // 2,6 dias no ar: com as mesmas visitas pagas, quem via a oferta caiu 75% e quem clicava em
+  // comprar, 76%. Antes dela, 13 vendas em 7 dias com só 3 pessoas chegando ao pitch.
+  assert.equal(atributo(slotTag[0], 'data-vsl-trava'), null, 'o slot voltou a ter data-vsl-trava');
+  assert.doesNotMatch(html, /vsl-trava/, 'voltou a trava (componente, classe ou CSS)');
+  assert.doesNotMatch(html.match(/<html[^>]*>/)[0], /class=/);
+});
+
 test('a oferta é declarada, e não é a da assinatura', () => {
   // Sem `data-vsl-content` o receptor assume `assinatura_2026`, e os marcos
   // desta página se misturariam aos da outra na mesma conversão da Meta.
