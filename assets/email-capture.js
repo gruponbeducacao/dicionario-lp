@@ -54,6 +54,12 @@
       utm_campaign: getUrlParam('utm_campaign'),
       dispositivo: (window.innerWidth <= 720) ? 'Mobile' : 'Desktop'
     });
+    // Primeiro e último toque, id do clique e página de entrada (assets/origem.js).
+    try {
+      if (window.FC_ORIGEM && typeof window.FC_ORIGEM.anexarCamposDoLead === 'function') {
+        window.FC_ORIGEM.anexarCamposDoLead(data);
+      }
+    } catch (e) {}
     return fetch(ENDPOINT, { method: 'POST', body: data, mode: 'no-cors' });
   }
   function isValidEmail(v) { return !!v && /\S+@\S+\.\S+/.test(v); }

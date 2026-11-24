@@ -3,13 +3,16 @@
    O GTM continua sendo o único emissor de tags: checkout_click é intenção
    de compra (ClicouComprar), não InitiateCheckout nem Purchase.
    Não grava cookies nem chama serviços externos. Falha de storage/pixel
-   não pode impedir a navegação. */
+   não pode impedir a navegação.
+   Desde 24/11/2026 também guarda o primeiro e o último toque da pessoa
+   (localStorage `fc_toques`, 90 dias) para os formulários de captura. Isso
+   não muda nada no checkout: a Kiwify continua recebendo a origem da sessão. */
 (function () {
   'use strict';
 
   if (window.FC_ORIGEM && window.FC_ORIGEM.instalada) return;
   var CHAVE = 'fc_origem';
-  var VERSAO = 'origem-js-2026-09-09';
+  var VERSAO = 'origem-js-2026-11-24';
   var GUARDAR = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
                  'src', 'sck', 'fbclid', 'gclid'];
   var HERDA = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'src', 'sck', 'fbclid', 'gclid'];
@@ -54,6 +57,166 @@
       ? anterior.fbclidEm : Date.now();
   }
   try { sessionStorage.setItem(CHAVE, JSON.stringify(origem)); } catch (e) {}
+
+  /* ---------- Primeiro e último toque (contrato de 24/11/2026) ----------
+     Toque = chegada com parâmetro de campanha OU com referrer de domínio de
+     fora da marca. Visita direta não cria toque. O primeiro só é trocado
+     quando o registro expira (90 dias sem toque novo); o último é sempre o
+     mais recente. Fica só neste navegador (localStorage, nunca cookie) e só
+     sai daqui no corpo dos formulários de captura. Não alimenta o checkout. */
+  var CHAVE_TOQUES = 'fc_toques';
+  var VALIDADE_TOQUES = 90 * 24 * 60 * 60 * 1000;
+  var LIMITE_VALOR = 300;
+  var DE_CAMPANHA = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+                     'src', 'fbclid', 'gclid'];
+  // Domínios da marca e do checkout (e seus subdomínios): referrer daqui é
+  // navegação interna, não toque.
+  var DA_CASA = ['fluenciacontabil.com.br', 'kiwify.com.br'];
+
+  // Valor longo é descartado, não truncado. E-mail nunca entra como origem.
+  function valorLimpo(v) {
+    if (typeof v !== 'string' || !v || v.length > LIMITE_VALOR) return '';
+    if (/[^\s@\/?&=]+@[^\s@\/?&=]+\.[a-z]{2,}/i.test(v.replace(/%40/gi, '@'))) return '';
+    return v;
+  }
+
+  function daCasa(host) {
+    host = String(host || '').toLowerCase();
+    if (!host || host === String(window.location.hostname || '').toLowerCase()) return true;
+    for (var i = 0; i < DA_CASA.length; i++) {
+      var d = DA_CASA[i];
+      if (host === d || host.slice(-(d.length + 1)) === '.' + d) return true;
+    }
+    return false;
+  }
+
+  // Só host + caminho: sem query, sem fragmento, sem porta.
+  function hostCaminho(u) {
+    return valorLimpo(String(u.hostname || '').toLowerCase() + (u.pathname || ''));
+  }
+
+  function referrerExterno() {
+    try {
+      if (!document.referrer) return null;
+      var u = new URL(document.referrer);
+      // android-app:// é o que apps como Instagram e Gmail mandam no Android.
+      if (['http:', 'https:', 'android-app:'].indexOf(u.protocol) === -1) return null;
+      if (daCasa(u.hostname)) return null;
+      return { valor: hostCaminho(u) };
+    } catch (e) { return null; }
+  }
+
+  function toqueDestaVisita(agora) {
+    var t = { em: agora, pagina: '', referrer: '' };
+    var temCampanha = false;
+    try {
+      var p = new URLSearchParams(window.location.search);
+      DE_CAMPANHA.forEach(function (k) {
+        var v = p.get(k);
+        if (v) temCampanha = true;
+        t[k] = valorLimpo(v);
+      });
+    } catch (e) {}
+    var ref = referrerExterno();
+    if (!temCampanha && !ref) return null;
+    t.referrer = ref ? ref.valor : '';
+    try { t.pagina = hostCaminho(window.location); } catch (e) {}
+    return t;
+  }
+
+  function toqueValido(t, agora) {
+    if (!t || typeof t !== 'object' || Array.isArray(t)) return null;
+    // Relógio adiantado em mais de um dia invalida o registro em vez de
+    // impedir que ele expire.
+    if (typeof t.em !== 'number' || !isFinite(t.em) || t.em <= 0 || t.em > agora + 86400000) return null;
+    var limpo = { em: t.em };
+    ['pagina', 'referrer'].concat(DE_CAMPANHA).forEach(function (k) { limpo[k] = valorLimpo(t[k]); });
+    return limpo;
+  }
+
+  function registroValido(bruto, agora) {
+    if (!bruto || typeof bruto !== 'object' || Array.isArray(bruto)) return null;
+    var primeiro = toqueValido(bruto.primeiro, agora);
+    var ultimo = toqueValido(bruto.ultimo, agora);
+    if (!primeiro || !ultimo || primeiro.em > ultimo.em) return null;
+    if (agora - ultimo.em > VALIDADE_TOQUES) return null;
+    return { v: 1, primeiro: primeiro, ultimo: ultimo };
+  }
+
+  function lerToques(agora) {
+    try {
+      return registroValido(JSON.parse(window.localStorage.getItem(CHAVE_TOQUES) || 'null'), agora);
+    } catch (e) { return null; }
+  }
+
+  // Cópia em memória: com o storage bloqueado, ao menos o toque desta página
+  // chega ao formulário.
+  var toquesDaPagina = null;
+  try {
+    var agoraToques = Date.now();
+    toquesDaPagina = lerToques(agoraToques);
+    var novoToque = toqueDestaVisita(agoraToques);
+    if (novoToque) {
+      toquesDaPagina = { v: 1, primeiro: toquesDaPagina ? toquesDaPagina.primeiro : novoToque, ultimo: novoToque };
+      try { window.localStorage.setItem(CHAVE_TOQUES, JSON.stringify(toquesDaPagina)); } catch (e) {}
+    } else if (!toquesDaPagina) {
+      // Expirado ou ilegível: descarta os dois.
+      try { window.localStorage.removeItem(CHAVE_TOQUES); } catch (e) {}
+    }
+  } catch (e) { toquesDaPagina = null; }
+
+  function emIso(ms) {
+    try { return new Date(ms).toISOString(); } catch (e) { return ''; }
+  }
+
+  // Objeto plano com os campos do contrato, todos string ('' quando não há).
+  function camposDoLead() {
+    var c = {
+      pt_source: '', pt_medium: '', pt_campaign: '', pt_content: '', pt_term: '', pt_src: '',
+      pt_pagina: '', pt_referrer: '', pt_em: '', entrada: '', ut_em: '', fbclid: '', gclid: ''
+    };
+    try {
+      var agora = Date.now();
+      var t = lerToques(agora) || registroValido(toquesDaPagina, agora);
+      if (!t) return c;
+      var p = t.primeiro, u = t.ultimo;
+      c.pt_source = p.utm_source; c.pt_medium = p.utm_medium; c.pt_campaign = p.utm_campaign;
+      c.pt_content = p.utm_content; c.pt_term = p.utm_term; c.pt_src = p.src;
+      c.pt_pagina = p.pagina; c.pt_referrer = p.referrer; c.pt_em = emIso(p.em);
+      c.entrada = u.pagina; c.ut_em = emIso(u.em); c.fbclid = u.fbclid; c.gclid = u.gclid;
+    } catch (e) {}
+    return c;
+  }
+
+  // Acrescenta os campos ao corpo do POST (URLSearchParams, FormData ou
+  // objeto) sem sobrescrever nada que o formulário já mande.
+  function anexarCamposDoLead(corpo) {
+    try {
+      var c = camposDoLead();
+      Object.keys(c).forEach(function (k) {
+        if (corpo && typeof corpo.append === 'function' && typeof corpo.has === 'function') {
+          if (!corpo.has(k)) corpo.append(k, c[k]);
+        } else if (corpo && typeof corpo === 'object' && !Object.prototype.hasOwnProperty.call(corpo, k)) {
+          corpo[k] = c[k];
+        }
+      });
+    } catch (e) {}
+    return corpo;
+  }
+
+  // Mesmo contexto que assets/email-capture.js manda (página, referrer,
+  // utm_* e src da sessão, dispositivo) mais os campos de toque. Para os
+  // formulários que não passam por ele, como a newsletter dos posts.
+  function contextoDoLead() {
+    var c = {};
+    try { c.pagina = window.location.pathname + window.location.search; } catch (e) {}
+    try { c.referrer = document.referrer || ''; } catch (e) {}
+    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'src'].forEach(function (k) {
+      c[k] = typeof origem[k] === 'string' ? origem[k] : '';
+    });
+    try { c.dispositivo = window.matchMedia('(max-width: 720px)').matches ? 'Mobile' : 'Desktop'; } catch (e) {}
+    return anexarCamposDoLead(c);
+  }
 
   function fbc() {
     var c = cookie('_fbc');
@@ -147,7 +310,10 @@
 
   // Marcador único evita listeners, temporizadores e eventos duplicados
   // mesmo se o asset entrar duas vezes antes de DOMContentLoaded.
-  window.FC_ORIGEM = { origem: origem, versao: VERSAO, instalada: true };
+  window.FC_ORIGEM = {
+    origem: origem, versao: VERSAO, instalada: true,
+    camposDoLead: camposDoLead, anexarCamposDoLead: anexarCamposDoLead, contextoDoLead: contextoDoLead
+  };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', aoCarregar, { once: true });
   else aoCarregar();
 })();

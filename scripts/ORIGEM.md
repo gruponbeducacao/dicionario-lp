@@ -2,7 +2,7 @@
 
 `assets/origem.js` captura a campanha na entrada, mantém a origem na sessão e
 prepara os links para o checkout. Todas as páginas públicas com GTM devem carregar
-uma única cópia, com caminho relativo e a versão atual (`?v=20260909`). Isso inclui
+uma única cópia, com caminho relativo e a versão atual (`?v=20261124`). Isso inclui
 páginas sem botão de compra: uma visita ao blog pode continuar até uma oferta.
 
 ## Contrato
@@ -52,3 +52,43 @@ e servidor precisam de homologação separada; não são comprovadas por estes t
 Referências: [dataLayer do Google](https://developers.google.com/tag-platform/tag-manager/datalayer),
 [tratamento oficial de click ID da Meta](https://github.com/facebook/capi-param-builder/blob/main/client_js/shared/utils/cookieUtil.js)
 e [eventos do pixel na Kiwify](https://ajuda.kiwify.com.br/pt-br/article/como-configurar-o-pixel-do-facebook-1rb2xtr/).
+
+## Primeiro e último toque — 24/11/2026
+
+Contrato: `_contrato_origem_toques.md` (site, Apps Script e Gestão seguem o mesmo
+arquivo). O `origem.js` passa a guardar, além da origem da sessão, o primeiro e o
+último toque da pessoa em `localStorage` (`fc_toques`), nunca em cookie.
+
+- Toque = chegada com `utm_*`, `src`, `fbclid` ou `gclid` na URL, ou com referrer
+  de domínio de fora da marca. Referrer de `fluenciacontabil.com.br`, `kiwify.com.br`
+  (e subdomínios) ou do próprio host é navegação interna. `sck` sozinho não é toque.
+  Visita direta não cria toque.
+- O primeiro toque é gravado uma vez e só é trocado quando o registro expira. O
+  último é sempre o mais recente. Validade: 90 dias contados do último toque,
+  conferida ao carregar e também na hora do envio; expirado, os dois somem.
+- Página e referrer guardam só host + caminho (sem query, fragmento ou porta).
+  Valor acima de 300 caracteres é descartado (não truncado). Valor com cara de
+  e-mail é descartado.
+- `FC_ORIGEM.camposDoLead()` devolve um objeto plano com `pt_source`, `pt_medium`,
+  `pt_campaign`, `pt_content`, `pt_term`, `pt_src`, `pt_pagina`, `pt_referrer`,
+  `pt_em`, `entrada`, `ut_em`, `fbclid` e `gclid`, todos string (vazios quando não
+  há toque). Datas em ISO 8601 UTC.
+- `FC_ORIGEM.anexarCamposDoLead(corpo)` acrescenta esses campos a um
+  `URLSearchParams`, `FormData` ou objeto, sem sobrescrever o que o formulário já
+  manda. `FC_ORIGEM.contextoDoLead()` devolve o mesmo contexto do `email-capture.js`
+  (página, referrer, `utm_*` e `src` da sessão, dispositivo) mais os campos acima,
+  para formulários que não passam por ele (reserva da newsletter dos posts).
+- Os campos de hoje (`utm_*`, `src`, `pagina`, `referrer`, `dispositivo`, `origem`,
+  `ref`) continuam iguais e continuam vindo da sessão.
+- O checkout não muda: a Kiwify continua recebendo só a origem da sessão
+  (`fc_origem`, lista `HERDA`, `s1`/`s2`/`s3`). O teste
+  `checkout continua igual` confere que o registro de toques não entra no link.
+- Com o `localStorage` bloqueado (ou cheio), nada lança: o formulário recebe ao
+  menos o toque da página atual, guardado em memória.
+
+No Dicionário, nenhuma página carrega formulário que poste no Apps Script hoje
+(o `assets/email-capture.js` existe, mas o `index.html` não o carrega; mesmo assim
+o `submitEmail` dele já chama `anexarCamposDoLead`). O registro serve para quando
+houver captura aqui. O `localStorage` é por domínio: os toques do Dicionário não
+aparecem nos formulários do site principal, e vice-versa. Entre os dois, a
+origem segue indo pela URL, como antes.
