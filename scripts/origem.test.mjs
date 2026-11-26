@@ -10,20 +10,30 @@ const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const fonte = readFileSync(new URL('../assets/origem.js', import.meta.url), 'utf8');
 const INSTANTE = 1788955200000;
 const checkout = 'https://pay.kiwify.com.br/oferta-sintetica?utm_source=site&utm_content=oferta';
-function ensaio({ url = 'https://fluenciacontabil.com.br/cursos.html', hrefs = [checkout], storage = new Map(), cookie = '', bloqueado = false, carregando = false, agoraInicial = INSTANTE } = {}) {
+function ensaio({ url = 'https://fluenciacontabil.com.br/cursos.html', hrefs = [checkout], storage = new Map(), cookie = '', bloqueado = false, carregando = false, agoraInicial = INSTANTE, local = new Map(), localBloqueado = false, referrer = '' } = {}) {
   let agora = agoraInicial;
   const listeners = new Map();
   const timers = new Map();
   const links = hrefs.map((href) => ({ href, getAttribute: () => null }));
   const document = {
     cookie,
+    referrer,
     readyState: carregando ? 'loading' : 'complete',
     querySelectorAll: () => links,
     addEventListener(tipo, fn) {
       listeners.set(tipo, [...(listeners.get(tipo) || []), fn]);
     },
   };
-  const window = { location: new URL(url), dataLayer: [] };
+  const falhaLocal = () => { if (localBloqueado) throw Error('localStorage bloqueado'); };
+  const window = {
+    location: new URL(url), dataLayer: [],
+    matchMedia: () => ({ matches: false }),
+    localStorage: {
+      getItem(k) { falhaLocal(); return local.get(k) ?? null; },
+      setItem(k, v) { falhaLocal(); local.set(k, String(v)); },
+      removeItem(k) { falhaLocal(); local.delete(k); },
+    },
+  };
   const contexto = vm.createContext({
     window, document, URL, URLSearchParams,
     Date: class extends Date { static now() { return agora; } },
@@ -40,7 +50,7 @@ function ensaio({ url = 'https://fluenciacontabil.com.br/cursos.html', hrefs = [
   };
   carregar();
   return {
-    window, document, links, storage, timers, carregar,
+    window, document, links, storage, local, timers, carregar,
     tempo(ms) { agora += ms; },
     pronto() { emitir('DOMContentLoaded'); },
     clicar(i = 0, tipo = 'click', button = 0) {
@@ -182,8 +192,168 @@ test('todas as páginas públicas com GTM carregam uma única cópia atual do sc
     const referencias = [...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']*assets\/origem\.js[^"']*)["'][^>]*>/g)];
     assert.equal(referencias.length, 1, `${arquivo}: uma única inclusão`);
     const referencia = referencias[0][1];
-    assert.equal(referencia.split('?')[1], 'v=20260909', `${arquivo}: cache atualizado`);
+    assert.equal(referencia.split('?')[1], 'v=20261124', `${arquivo}: cache atualizado`);
     assert.equal(path.resolve(raiz, path.dirname(arquivo), referencia.split('?')[0]), path.join(raiz, 'assets', 'origem.js'));
   }
   assert.ok(conferidas > 0);
+});
+
+/* ---------- Primeiro e último toque (contrato de 24/11/2026) ---------- */
+const DIA = 24 * 60 * 60 * 1000;
+const CAMPOS_DO_LEAD = ['pt_source', 'pt_medium', 'pt_campaign', 'pt_content', 'pt_term', 'pt_src',
+  'pt_pagina', 'pt_referrer', 'pt_em', 'entrada', 'ut_em', 'fbclid', 'gclid'];
+const site = 'https://fluenciacontabil.com.br';
+// Cada página é um carregamento novo do script, com o mesmo localStorage.
+const visita = (local, agora, url, extra = {}) => ensaio({ local, agoraInicial: agora, url, hrefs: [], ...extra });
+
+test('campos do lead: sempre as mesmas chaves, todas string, vazias sem toque', () => {
+  const c = visita(new Map(), INSTANTE, `${site}/cursos.html`).window.FC_ORIGEM.camposDoLead();
+  assert.deepEqual(Object.keys(c).sort(), [...CAMPOS_DO_LEAD].sort());
+  for (const k of CAMPOS_DO_LEAD) assert.equal(c[k], '', k);
+});
+
+test('primeiro toque fica fixo; último toque troca a cada nova campanha', () => {
+  const local = new Map();
+  visita(local, INSTANTE, `${site}/blog/aula.html?utm_source=meta&utm_medium=cpc&utm_campaign=teste&utm_content=peca&utm_term=t1&src=anuncio&fbclid=abc#topo`);
+  // Navegação interna, sem parâmetro e com referrer da própria marca: não é toque.
+  visita(local, INSTANTE + 1000, `${site}/cursos.html`, { referrer: `${site}/blog/aula.html?utm_source=meta` });
+  let c = visita(local, INSTANTE + 2000, `${site}/cursos.html`).window.FC_ORIGEM.camposDoLead();
+  assert.equal(c.pt_source, 'meta');
+  assert.equal(c.pt_medium, 'cpc');
+  assert.equal(c.pt_campaign, 'teste');
+  assert.equal(c.pt_content, 'peca');
+  assert.equal(c.pt_term, 't1');
+  assert.equal(c.pt_src, 'anuncio');
+  assert.equal(c.pt_pagina, 'fluenciacontabil.com.br/blog/aula.html');
+  assert.equal(c.pt_referrer, '');
+  assert.equal(c.pt_em, new Date(INSTANTE).toISOString());
+  assert.equal(c.entrada, 'fluenciacontabil.com.br/blog/aula.html');
+  assert.equal(c.ut_em, new Date(INSTANTE).toISOString());
+  assert.equal(c.fbclid, 'abc');
+  assert.equal(c.gclid, '');
+
+  const depois = INSTANTE + 10 * DIA;
+  visita(local, depois, `${site}/black.html?utm_source=google&utm_campaign=black&gclid=g123`);
+  c = visita(local, depois + 1000, `${site}/index.html`).window.FC_ORIGEM.camposDoLead();
+  assert.equal(c.pt_source, 'meta', 'primeiro toque não muda');
+  assert.equal(c.pt_campaign, 'teste');
+  assert.equal(c.pt_em, new Date(INSTANTE).toISOString());
+  assert.equal(c.entrada, 'fluenciacontabil.com.br/black.html');
+  assert.equal(c.ut_em, new Date(depois).toISOString());
+  assert.equal(c.gclid, 'g123');
+  assert.equal(c.fbclid, '', 'id de clique é do último toque, sem misturar com o anterior');
+});
+
+test('referrer externo cria toque, guardado só com host e caminho', () => {
+  const local = new Map();
+  const e = visita(local, INSTANTE, `${site}/blog/dre.html`, { referrer: 'https://www.google.com/search?q=dre+concurso' });
+  const c = e.window.FC_ORIGEM.camposDoLead();
+  assert.equal(c.pt_referrer, 'www.google.com/search');
+  assert.equal(c.pt_source, '');
+  assert.equal(c.pt_pagina, 'fluenciacontabil.com.br/blog/dre.html');
+  assert.equal(c.entrada, 'fluenciacontabil.com.br/blog/dre.html');
+  assert.ok(!local.get('fc_toques').includes('dre+concurso'), 'query do referrer nunca é guardada');
+  // App do Instagram no Android.
+  const app = visita(new Map(), INSTANTE, `${site}/`, { referrer: 'android-app://com.instagram.android/' });
+  assert.equal(app.window.FC_ORIGEM.camposDoLead().pt_referrer, 'com.instagram.android/');
+});
+
+test('visita direta e referrer da marca ou do checkout não criam toque', () => {
+  for (const referrer of ['', `${site}/`, 'https://www.fluenciacontabil.com.br/cursos.html',
+    'https://dicionario.fluenciacontabil.com.br/', 'https://pay.kiwify.com.br/abc', 'https://kiwify.com.br/']) {
+    const local = new Map();
+    const c = visita(local, INSTANTE, `${site}/cursos.html`, { referrer }).window.FC_ORIGEM.camposDoLead();
+    assert.equal(local.has('fc_toques'), false, referrer);
+    assert.equal(c.entrada, '', referrer);
+  }
+  // Parâmetro sck sozinho não é campanha pelo contrato.
+  const local = new Map();
+  visita(local, INSTANTE, `${site}/cursos.html?sck=x`);
+  assert.equal(local.has('fc_toques'), false);
+});
+
+test('validade de 90 dias contada do último toque; expirado, os dois somem', () => {
+  const local = new Map();
+  visita(local, INSTANTE, `${site}/?utm_source=meta&utm_campaign=antiga`);
+  // Dia 89: ainda vale.
+  assert.equal(visita(local, INSTANTE + 89 * DIA, `${site}/cursos.html`).window.FC_ORIGEM.camposDoLead().pt_campaign, 'antiga');
+  // Toque no dia 89 renova a validade dos dois.
+  visita(local, INSTANTE + 89 * DIA, `${site}/?utm_source=google&utm_campaign=meio`);
+  const renovado = visita(local, INSTANTE + 170 * DIA, `${site}/cursos.html`).window.FC_ORIGEM.camposDoLead();
+  assert.equal(renovado.pt_campaign, 'antiga');
+  assert.equal(renovado.entrada, 'fluenciacontabil.com.br/');
+  // Mais de 90 dias depois do último toque: descarta tudo.
+  const expirado = visita(local, INSTANTE + 179 * DIA + 1, `${site}/cursos.html`);
+  for (const k of CAMPOS_DO_LEAD) assert.equal(expirado.window.FC_ORIGEM.camposDoLead()[k], '', k);
+  assert.equal(local.has('fc_toques'), false);
+  // Toque novo depois de expirar vira o novo primeiro.
+  const novo = visita(local, INSTANTE + 200 * DIA, `${site}/?utm_source=youtube&utm_campaign=nova`).window.FC_ORIGEM.camposDoLead();
+  assert.equal(novo.pt_source, 'youtube');
+  assert.equal(novo.pt_em, new Date(INSTANTE + 200 * DIA).toISOString());
+});
+
+test('a validade também é conferida no envio, não só ao carregar a página', () => {
+  const e = visita(new Map(), INSTANTE, `${site}/?utm_source=meta`);
+  e.tempo(90 * DIA + 1);
+  assert.equal(e.window.FC_ORIGEM.camposDoLead().pt_source, '');
+});
+
+test('valor acima de 300 caracteres é descartado, não truncado; e-mail nunca vira origem', () => {
+  const longo = 'x'.repeat(301);
+  const c = visita(new Map(), INSTANTE, `${site}/?utm_source=${longo}&utm_campaign=${'y'.repeat(300)}&utm_content=fulano%40example.com&fbclid=${longo}`).window.FC_ORIGEM.camposDoLead();
+  assert.equal(c.pt_source, '');
+  assert.equal(c.pt_campaign, 'y'.repeat(300));
+  assert.equal(c.pt_content, '');
+  assert.equal(c.fbclid, '');
+  const ref = visita(new Map(), INSTANTE, `${site}/`, { referrer: `https://exemplo.invalid/${'a'.repeat(400)}` }).window.FC_ORIGEM.camposDoLead();
+  assert.equal(ref.pt_referrer, '');
+  assert.equal(ref.entrada, 'fluenciacontabil.com.br/', 'referrer externo longo ainda conta como toque');
+});
+
+test('localStorage bloqueado ou corrompido não lança e não impede o checkout', () => {
+  const e = visita(new Map(), INSTANTE, `${site}/?utm_source=meta&fbclid=abc`, { localBloqueado: true, hrefs: [checkout] });
+  e.clicar();
+  assert.equal(e.parametros().get('utm_source'), 'meta');
+  const c = e.window.FC_ORIGEM.camposDoLead();
+  assert.equal(c.pt_source, 'meta', 'sem storage, vale o toque desta página');
+  assert.equal(c.fbclid, 'abc');
+  assert.equal(visita(new Map(), INSTANTE, `${site}/`, { localBloqueado: true }).window.FC_ORIGEM.camposDoLead().pt_source, '');
+  for (const lixo of ['{', 'null', '[]', '42', '{"primeiro":{"em":"ontem"},"ultimo":{}}',
+    JSON.stringify({ primeiro: { em: INSTANTE + 5 }, ultimo: { em: INSTANTE } }),
+    JSON.stringify({ primeiro: { em: INSTANTE + 30 * DIA }, ultimo: { em: INSTANTE + 30 * DIA } })]) {
+    const local = new Map([['fc_toques', lixo]]);
+    const v = visita(local, INSTANTE, `${site}/cursos.html`);
+    assert.equal(v.window.FC_ORIGEM.camposDoLead().pt_em, '', lixo);
+    assert.equal(local.has('fc_toques'), false, lixo);
+  }
+});
+
+test('anexar os campos não sobrescreve o que o formulário já manda', () => {
+  const e = visita(new Map(), INSTANTE, `${site}/?utm_source=meta&gclid=g1`);
+  const corpo = new URLSearchParams({ email: 'ensaio@example.invalid', gclid: 'do-form' });
+  e.window.FC_ORIGEM.anexarCamposDoLead(corpo);
+  assert.equal(corpo.get('gclid'), 'do-form');
+  assert.equal(corpo.get('pt_source'), 'meta');
+  assert.equal(corpo.getAll('gclid').length, 1);
+  const obj = e.window.FC_ORIGEM.anexarCamposDoLead({ origem: 'x' });
+  assert.equal(obj.origem, 'x');
+  assert.equal(obj.entrada, 'fluenciacontabil.com.br/');
+  const ctx = e.window.FC_ORIGEM.contextoDoLead();
+  for (const k of ['pagina', 'referrer', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'src', 'dispositivo', ...CAMPOS_DO_LEAD]) {
+    assert.equal(typeof ctx[k], 'string', k);
+  }
+  assert.equal(ctx.utm_source, 'meta');
+  assert.equal(ctx.dispositivo, 'Desktop');
+});
+
+test('checkout continua igual: o registro de toques não entra no link da Kiwify', () => {
+  const comToques = new Map();
+  visita(comToques, INSTANTE - DIA, `${site}/?utm_source=google&utm_campaign=antiga&gclid=g0&fbclid=velho`);
+  for (const url of [`${site}/cursos.html`, `${site}/cursos.html?utm_source=meta&utm_content=peca&fbclid=abc`]) {
+    const a = ensaio({ url, cookie: `_fbp=fb.1.${INSTANTE}.navegador` });
+    const b = ensaio({ url, cookie: `_fbp=fb.1.${INSTANTE}.navegador`, local: new Map(comToques) });
+    a.clicar(); b.clicar();
+    assert.equal(b.links[0].href, a.links[0].href, url);
+    assert.equal(JSON.stringify(b.window.dataLayer), JSON.stringify(a.window.dataLayer));
+  }
 });
